@@ -5,74 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ฟอร์มแจ้งลา</title>
   <style>
-    body {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
       font-family: "Segoe UI", Tahoma, sans-serif;
       background: #f4f7fa;
-      padding: 20px;
-      margin: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
     }
 
     .form-container {
-    max-width: 500px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 15px 30px; /* ลดจาก 25px เป็น 15px ด้านบน */
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-
-    }
-
-    h2 { text-align: center; margin-bottom: 25px; color: #333; }
-
-    .form-group { margin-bottom: 18px; }
-    label { display: block; font-weight: 500; margin-bottom: 5px; color: #555; }
-
-    input, select, textarea {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 14px;
-      transition: 0.3s;
+      max-width: 450px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      max-height: 95vh; /* ป้องกันเลื่อนมาก */
     }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #007bff;
-      outline: none;
-      box-shadow: 0 0 5px rgba(0,123,255,0.3);
-    }
-
-    textarea { resize: vertical; min-height: 70px; }
-
-    .date-time-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .date-time-group input {
-      flex: 1 1 48%;
-      min-width: 120px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #fff;
-      background: linear-gradient(90deg, #4facfe, #00f2fe);
-      transition: 0.3s;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-    }
-
-    .btn:disabled { background: #aaa; cursor: not-allowed; }
 
     .btn-back {
       display: inline-block;
@@ -87,8 +43,56 @@
       background: #e0f0ff;
       transition: 0.3s;
     }
-
     .btn-back:hover { background: #cce4ff; }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: 500; margin-bottom: 5px; color: #555; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,123,255,0.3);
+    }
+    textarea { resize: vertical; min-height: 70px; }
+
+    .date-time-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .date-time-group input {
+      flex: 1 1 48%;
+      min-width: 100px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+      transition: 0.3s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { background: #aaa; cursor: not-allowed; }
 
     .alert {
       background: #ffefef;
@@ -99,11 +103,16 @@
       margin-bottom: 15px;
       display: none;
     }
+
+    @media (max-height: 600px) {
+      .form-container { padding: 15px; max-height: 90vh; }
+    }
   </style>
 </head>
 <body>
   <div class="form-container">
     <button class="btn-back" onclick="location.href='dashboard.html'">← กลับไปหน้าหลัก</button>
+    <h2>ฟอร์มแจ้งลา</h2>
 
     <div class="alert" id="alertBox"></div>
 
