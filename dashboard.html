@@ -152,13 +152,14 @@ async function init() {
     const greet = greetings[Math.floor(Math.random()*greetings.length)];
     dashboard.innerHTML = `
       <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-      <div class="greeting">สวัสดีคุณ ${data.name} - ${greet}</div>
+      <div class="greeting">สวัสดีคุณ ${data.name}</div>
+      <div class="greeting-sub">พร้อมทำงานกันเถอะ!</div>
       <table class="info-table">
         <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
-        <tr><th>ลาพักร้อน</th><td>${data.vacation}</td></tr>
-        <tr><th>ลากิจ</th><td>${data.personal}</td></tr>
-        <tr><th>ลาป่วย</th><td>${data.sick}</td></tr>
-        <tr><th>ขาดงาน</th><td>${data.absent}</td></tr>
+        <tr><th>ลาพักร้อน(คงเหลือ)</th><td>${data.vacation}</td></tr>
+        <tr><th>ลากิจ(คงเหลือ)</th><td>${data.personal}</td></tr>
+        <tr><th>ลาป่วย(คงเหลือ)</th><td>${data.sick}</td></tr>
+        <tr><th>ขาดงาน(สะสม)</th><td>${data.absent}</td></tr>
       </table>
       <div class="btn-group">
         <button class="btn btn-leave" onclick="location.href='leave.html'">แจ้งลาออนไลน์</button>
