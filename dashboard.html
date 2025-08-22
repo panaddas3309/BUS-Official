@@ -165,12 +165,10 @@
             <tr><th>ขาดงาน(สะสม)</th><td>${data.absent}</td></tr>
           </table>
           <div class="btn-group">
-            <button class="btn btn-leave" onclick="
-            
-              localStorage.setItem('employeeData', JSON.stringify(data));
-              location.href='leaveform.html';
-            ">แจ้งลาออนไลน์
-            </button>
+          <button class="btn btn-leave" onclick="location.href='leaveform.html'">
+            แจ้งลาออนไลน์
+          </button>
+
             
             <button class="btn btn-status" onclick="location.href='status.html'">ตรวจสอบสถานะ</button>
           </div>
