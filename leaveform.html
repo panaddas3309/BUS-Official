@@ -1,230 +1,281 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ฟอร์มแจ้งลา</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: #f4f7fa;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave Request Form</title>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
 
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 10px;
-    }
+  .form-container {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    box-sizing: border-box;
+    overflow: hidden;
+  }
 
-    .form-container {
-      width: 100%;
-      max-width: 450px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      overflow-y: auto;
-      max-height: 95vh; /* ป้องกันเลื่อนมาก */
-    }
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
 
-    .btn-back {
-      display: inline-block;
-      margin-bottom: 15px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      color: #007bff;
-      background: #e0f0ff;
-      transition: 0.3s;
-    }
-    .btn-back:hover { background: #cce4ff; }
+  .form-group {
+    margin-bottom: 15px;
+    position: relative;
+  }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #333;
-    }
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #555;
+  }
 
-    .form-group { margin-bottom: 15px; }
-    label { display: block; font-weight: 500; margin-bottom: 5px; color: #555; }
+  input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.3s;
+    outline: none;
+    box-sizing: border-box;
+  }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      font-size: 14px;
-      transition: 0.3s;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: #007bff;
-      outline: none;
-      box-shadow: 0 0 5px rgba(0,123,255,0.3);
-    }
-    textarea { resize: vertical; min-height: 70px; }
+  input:focus, select:focus, textarea:focus {
+    border: 2px solid #4a90e2;
+    box-shadow: 0 0 8px rgba(74,144,226,0.3);
+  }
 
-    .date-time-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .date-time-group input {
-      flex: 1 1 48%;
-      min-width: 100px;
-    }
+  textarea { min-height: 80px; resize: vertical; }
 
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #fff;
-      background: linear-gradient(90deg, #4facfe, #00f2fe);
-      transition: 0.3s;
-    }
-    .btn:hover { opacity: 0.9; }
-    .btn:disabled { background: #aaa; cursor: not-allowed; }
+  .date-time-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
 
-    .alert {
-      background: #ffefef;
-      border: 1px solid #ff5c5c;
-      color: #d63031;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      display: none;
-    }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(90deg, #4a90e2, #357ab8);
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s;
+  }
 
-    @media (max-height: 600px) {
-      .form-container { padding: 15px; max-height: 90vh; }
+  .btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  .btn:hover {
+    background: linear-gradient(90deg, #357ab8, #2a5d91);
+  }
+
+  /* ripple effect */
+  .btn::after {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.4);
+    display: block;
+    border-radius: 50%;
+    transform: scale(0);
+    opacity: 0;
+    pointer-events: none;
+    animation: ripple 0.6s linear;
+  }
+
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
     }
-  </style>
+  }
+
+  .alert {
+    background: #ffe0e0;
+    border: 1px solid #ff6b6b;
+    color: #d63031;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    display: none;
+    animation: fadein 0.3s ease-in-out;
+  }
+
+  @keyframes fadein {
+    from {opacity: 0; transform: translateY(-5px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  .info-remaining {
+    font-size: 13px;
+    color: #555;
+    margin-top: 3px;
+  }
+
+  .back-btn {
+    display: block;
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #4a90e2;
+    cursor: pointer;
+  }
+
+</style>
 </head>
 <body>
-  <div class="form-container">
-    <button class="btn-back" onclick="location.href='dashboard.html'">← กลับไปหน้าหลัก</button>
-    <h2>ฟอร์มแจ้งลา</h2>
 
-    <div class="alert" id="alertBox"></div>
+<div class="form-container">
+  <h2>ฟอร์มแจ้งลา</h2>
 
-    <div class="form-group">
-      <label>ชื่อพนักงาน</label>
-      <input type="text" id="employeeName" disabled>
-    </div>
+  <div class="alert" id="alertBox"></div>
 
-    <div class="form-group">
-      <label>รหัสพนักงาน</label>
-      <input type="text" id="employeeId" disabled>
-    </div>
-
-    <div class="form-group">
-      <label>ประเภทการลา</label>
-      <select id="leaveType" required>
-        <option value="">-- เลือกประเภทการลา --</option>
-        <option value="vacation">ลาพักร้อน</option>
-        <option value="sick">ลาป่วย</option>
-        <option value="personal">ลากิจ</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>เหตุผลเพิ่มเติม (ไม่บังคับ)</label>
-      <textarea id="reason"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>ตั้งแต่</label>
-      <div class="date-time-group">
-        <input type="date" id="startDate" required>
-        <input type="time" id="startTime" required>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>ถึง</label>
-      <div class="date-time-group">
-        <input type="date" id="endDate" required>
-        <input type="time" id="endTime" required>
-      </div>
-    </div>
-
-    <button class="btn" id="submitBtn">ส่งคำขอลา</button>
+  <div class="form-group">
+    <label>ชื่อพนักงาน</label>
+    <input type="text" id="employeeName" disabled>
   </div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const LIFF_ID = "2007956727-rbZz9a0z";
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+  <div class="form-group">
+    <label>รหัสพนักงาน</label>
+    <input type="text" id="employeeId" disabled>
+  </div>
 
-    async function init() {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) liff.login();
+  <div class="form-group">
+    <label>ประเภทการลา</label>
+    <select id="leaveType" required>
+      <option value="">-- เลือกประเภทการลา --</option>
+      <option value="vacation">ลาพักร้อน</option>
+      <option value="sick">ลาป่วย</option>
+      <option value="personal">ลากิจ</option>
+    </select>
+    <div class="info-remaining" id="remainingInfo"></div>
+  </div>
 
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
+  <div class="form-group">
+    <label>เหตุผลเพิ่มเติม (ไม่บังคับ)</label>
+    <textarea id="reason"></textarea>
+  </div>
 
-      let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-      let data = await res.json();
+  <div class="form-group">
+    <label>ตั้งแต่</label>
+    <div class="date-time-group">
+      <input type="date" id="startDate" required>
+      <input type="time" id="startTime" required>
+    </div>
+  </div>
 
-      document.getElementById("employeeName").value = data.name;
-      document.getElementById("employeeId").value = data.employeeId;
+  <div class="form-group">
+    <label>ถึง</label>
+    <div class="date-time-group">
+      <input type="date" id="endDate" required>
+      <input type="time" id="endTime" required>
+    </div>
+  </div>
 
-      const submitBtn = document.getElementById("submitBtn");
-      const alertBox = document.getElementById("alertBox");
+  <button class="btn" id="submitBtn">ส่งคำขอลา</button>
 
-      submitBtn.addEventListener("click", function(e) {
-        e.preventDefault();
+  <div class="back-btn" onclick="location.href='dashboard.html'">← กลับไปหน้า Dashboard</div>
+</div>
 
-        const leaveType = document.getElementById("leaveType").value;
-        const reason = document.getElementById("reason").value;
-        const startDate = document.getElementById("startDate").value;
-        const startTime = document.getElementById("startTime").value;
-        const endDate = document.getElementById("endDate").value;
-        const endTime = document.getElementById("endTime").value;
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const LIFF_ID = "2007956727-rbZz9a0z";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
 
-        if (!leaveType || !startDate || !startTime || !endDate || !endTime) {
-          alertBox.style.display = "block";
-          alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
-          return;
-        }
+async function init() {
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) liff.login();
 
-        let remaining = 0;
-        if (leaveType === "vacation") remaining = data.vacation;
-        if (leaveType === "sick") remaining = data.personal;
-        if (leaveType === "personal") remaining = data.sick;
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
 
-        if (remaining <= 0) {
-          alertBox.style.display = "block";
-          alertBox.textContent = `คุณใช้สิทธิ์ลา ${document.querySelector("#leaveType option:checked").textContent} หมดแล้ว`;
-          return;
-        }
+  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+  let data = await res.json();
 
-        alertBox.style.display = "none";
-        submitBtn.disabled = true;
+  document.getElementById("employeeName").value = data.name;
+  document.getElementById("employeeId").value = data.employeeId;
 
-        const leaveRequest = {
-          employeeId: data.employeeId,
-          name: data.name,
-          type: leaveType,
-          reason: reason,
-          from: `${startDate} ${startTime}`,
-          to: `${endDate} ${endTime}`
-        };
+  const submitBtn = document.getElementById("submitBtn");
+  const alertBox = document.getElementById("alertBox");
+  const leaveType = document.getElementById("leaveType");
+  const remainingInfo = document.getElementById("remainingInfo");
 
-        console.log("ส่งคำขอลา:", leaveRequest);
-        alert("ส่งคำขอลาสำเร็จ!");
-      });
+  // แสดงสิทธิ์ที่เหลือทันที
+  leaveType.addEventListener("change", function() {
+    let remaining = 0;
+    if(this.value === "vacation") remaining = data.vacation;
+    if(this.value === "sick") remaining = data.personal;
+    if(this.value === "personal") remaining = data.sick;
+    remainingInfo.textContent = `สิทธิ์ที่เหลือ: ${remaining} วัน`;
+  });
+
+  submitBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+
+    const leaveTypeValue = leaveType.value;
+    const reason = document.getElementById("reason").value;
+    const startDate = document.getElementById("startDate").value;
+    const startTime = document.getElementById("startTime").value;
+    const endDate = document.getElementById("endDate").value;
+    const endTime = document.getElementById("endTime").value;
+
+    if (!leaveTypeValue || !startDate || !startTime || !endDate || !endTime) {
+      alertBox.style.display = "block";
+      alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
+      return;
     }
-    init();
-  </script>
+
+    let remaining = 0;
+    if (leaveTypeValue === "vacation") remaining = data.vacation;
+    if (leaveTypeValue === "sick") remaining = data.personal;
+    if (leaveTypeValue === "personal") remaining = data.sick;
+
+    if (remaining <= 0) {
+      alertBox.style.display = "block";
+      alertBox.textContent = `คุณใช้สิทธิ์ลา ${leaveType.options[leaveType.selectedIndex].textContent} หมดแล้ว`;
+      return;
+    }
+
+    alertBox.style.display = "none";
+    submitBtn.disabled = true;
+
+    const leaveRequest = {
+      employeeId: data.employeeId,
+      name: data.name,
+      type: leaveTypeValue,
+      reason: reason,
+      from: `${startDate} ${startTime}`,
+      to: `${endDate} ${endTime}`
+    };
+
+    console.log("ส่งคำขอลา:", leaveRequest);
+    alert("ส่งคำขอลาสำเร็จ!");
+  });
+}
+
+init();
+</script>
 </body>
 </html>
