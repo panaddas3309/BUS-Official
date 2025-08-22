@@ -106,7 +106,6 @@
     <div class="dot dot-2"></div>
     <div class="dot dot-3"></div>
   </div>
-
   <!-- กรอง gooey effect -->
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
     <defs>
@@ -123,59 +122,65 @@
   </svg>
 </div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const LIFF_ID = "2007956727-rbZz9a0z"; // <-- ใส่ LIFF ID ของคุณ
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+<!-- Dashboard จะซ่อนตอนแรก -->
+<div id="dashboard" class="dashboard" style="display:none"></div>
 
-    // ข้อความทักทายสุ่ม
-    const greetings = [
-      "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
-      "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
-      "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
-      "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
-      "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
-      "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
-    ];
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+  const LIFF_ID = "2007956727-rbZz9a0z"; 
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
 
-    async function init() {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) liff.login();
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
-      localStorage.setItem("lineUserId", userId);
+  const greetings = [
+    "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
+    "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
+    "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
+    "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
+    "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
+    "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
+  ];
 
-      let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-      let data = await res.json();
-      const dashboard = document.getElementById("dashboard");
+  async function init() {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) liff.login();
+    const profile = await liff.getProfile();
+    const userId = profile.userId;
+    localStorage.setItem("lineUserId", userId);
 
-      if (data.bound) {
-        const greet = greetings[Math.floor(Math.random()*greetings.length)];
-        dashboard.innerHTML = `
-          <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-          <div class="greeting">สวัสดีคุณ ${data.name}</div>
-          <div class="greeting-sub">${greet}</div>
-          <table class="info-table">
-            <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
-            <tr><th>ลาพักร้อน(คงเหลือ)</th><td>${data.vacation}</td></tr>
-            <tr><th>ลาป่วย(คงเหลือ)</th><td>${data.personal}</td></tr>
-            <tr><th>ลากิจ(คงเหลือ)</th><td>${data.sick}</td></tr>
-            <tr><th>ขาดงาน(สะสม)</th><td>${data.absent}</td></tr>
-          </table>
-          <div class="btn-group">
-            <button class="btn btn-leave" onclick="location.href='leave.html'">แจ้งลาออนไลน์</button>
-            <button class="btn btn-status" onclick="location.href='status.html'">ตรวจสอบสถานะ</button>
-          </div>
-        `;
-      } else {
-        dashboard.innerHTML = `
-          <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-          <div class="greeting">สวัสดีคุณ ${profile.displayName} - คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
-          <button class="btn btn-leave" onclick="location.href='bind.html'">ไปผูกบัญชี</button>
-        `;
-      }
+    let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+    let data = await res.json();
+    const dashboard = document.getElementById("dashboard");
+
+    if (data.bound) {
+      const greet = greetings[Math.floor(Math.random()*greetings.length)];
+      dashboard.innerHTML = `
+        <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+        <div class="greeting">สวัสดีคุณ ${data.name}</div>
+        <div class="greeting-sub">${greet}</div>
+        <table class="info-table">
+          <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
+          <tr><th>ลาพักร้อน(คงเหลือ)</th><td>${data.vacation}</td></tr>
+          <tr><th>ลาป่วย(คงเหลือ)</th><td>${data.personal}</td></tr>
+          <tr><th>ลากิจ(คงเหลือ)</th><td>${data.sick}</td></tr>
+          <tr><th>ขาดงาน(สะสม)</th><td>${data.absent}</td></tr>
+        </table>
+        <div class="btn-group">
+          <button class="btn btn-leave" onclick="location.href='leave.html'">แจ้งลาออนไลน์</button>
+          <button class="btn btn-status" onclick="location.href='status.html'">ตรวจสอบสถานะ</button>
+        </div>
+      `;
+    } else {
+      dashboard.innerHTML = `
+        <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+        <div class="greeting">สวัสดีคุณ ${profile.displayName} - คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
+        <button class="btn btn-leave" onclick="location.href='bind.html'">ไปผูกบัญชี</button>
+      `;
     }
-    init();
-  </script>
+
+    // ✅ ซ่อน Loader + แสดง Dashboard
+    document.getElementById("loading").style.display = "none";
+    dashboard.style.display = "block";
+  }
+
+  init();
+</script>
 </body>
-</html>
