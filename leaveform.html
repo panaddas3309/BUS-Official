@@ -7,51 +7,87 @@
   <style>
     body {
       font-family: "Segoe UI", Tahoma, sans-serif;
-      background: #f9f9f9;
+      background: #f4f7fa;
       padding: 20px;
+      margin: 0;
     }
 
     .form-container {
       max-width: 500px;
       margin: 0 auto;
       background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      padding: 25px 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
 
-    h2 { text-align: center; margin-bottom: 20px; }
+    h2 { text-align: center; margin-bottom: 25px; color: #333; }
 
-    .form-group { margin-bottom: 15px; }
-
-    label { display: block; font-weight: 500; margin-bottom: 5px; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-weight: 500; margin-bottom: 5px; color: #555; }
 
     input, select, textarea {
       width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
       font-size: 14px;
+      transition: 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,123,255,0.3);
     }
 
     textarea { resize: vertical; min-height: 70px; }
 
-    .date-time-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .date-time-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .date-time-group input {
+      flex: 1 1 48%;
+      min-width: 120px;
+    }
 
     .btn {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       color: #fff;
-      background: #007bff;
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
       transition: 0.3s;
     }
 
+    .btn:hover {
+      opacity: 0.9;
+    }
+
     .btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    .btn-back {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #007bff;
+      background: #e0f0ff;
+      transition: 0.3s;
+    }
+
+    .btn-back:hover { background: #cce4ff; }
 
     .alert {
       background: #ffefef;
@@ -66,6 +102,7 @@
 </head>
 <body>
   <div class="form-container">
+    <button class="btn-back" onclick="location.href='dashboard.html'">← กลับไปหน้าหลัก</button>
     <h2>ฟอร์มแจ้งลา</h2>
 
     <div class="alert" id="alertBox"></div>
@@ -120,66 +157,65 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
 
     async function init() {
-  await liff.init({ liffId: LIFF_ID });
-  if (!liff.isLoggedIn()) liff.login();
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) liff.login();
 
-  const profile = await liff.getProfile();
-  const userId = profile.userId;
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
 
-  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-  let data = await res.json();
+      let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+      let data = await res.json();
 
-  // ไม่ต้องเช็ค bound เพราะผู้ใช้ต้องผูกแล้ว
-  document.getElementById("employeeName").value = data.name;
-  document.getElementById("employeeId").value = data.employeeId;
+      document.getElementById("employeeName").value = data.name;
+      document.getElementById("employeeId").value = data.employeeId;
 
-  const submitBtn = document.getElementById("submitBtn");
-  const alertBox = document.getElementById("alertBox");
+      const submitBtn = document.getElementById("submitBtn");
+      const alertBox = document.getElementById("alertBox");
 
-  submitBtn.addEventListener("click", function(e) {
-    e.preventDefault();
+      submitBtn.addEventListener("click", function(e) {
+        e.preventDefault();
 
-    const leaveType = document.getElementById("leaveType").value;
-    const reason = document.getElementById("reason").value;
-    const startDate = document.getElementById("startDate").value;
-    const startTime = document.getElementById("startTime").value;
-    const endDate = document.getElementById("endDate").value;
-    const endTime = document.getElementById("endTime").value;
+        const leaveType = document.getElementById("leaveType").value;
+        const reason = document.getElementById("reason").value;
+        const startDate = document.getElementById("startDate").value;
+        const startTime = document.getElementById("startTime").value;
+        const endDate = document.getElementById("endDate").value;
+        const endTime = document.getElementById("endTime").value;
 
-    if (!leaveType || !startDate || !startTime || !endDate || !endTime) {
-      alertBox.style.display = "block";
-      alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
-      return;
+        if (!leaveType || !startDate || !startTime || !endDate || !endTime) {
+          alertBox.style.display = "block";
+          alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
+          return;
+        }
+
+        let remaining = 0;
+        if (leaveType === "vacation") remaining = data.vacation;
+        if (leaveType === "sick") remaining = data.personal;
+        if (leaveType === "personal") remaining = data.sick;
+
+        if (remaining <= 0) {
+          alertBox.style.display = "block";
+          alertBox.textContent = `คุณใช้สิทธิ์ลา ${document.querySelector("#leaveType option:checked").textContent} หมดแล้ว`;
+          return;
+        }
+
+        alertBox.style.display = "none";
+        submitBtn.disabled = true;
+
+        const leaveRequest = {
+          employeeId: data.employeeId,
+          name: data.name,
+          type: leaveType,
+          reason: reason,
+          from: `${startDate} ${startTime}`,
+          to: `${endDate} ${endTime}`
+        };
+
+        console.log("ส่งคำขอลา:", leaveRequest);
+        alert("ส่งคำขอลาสำเร็จ!");
+      });
     }
-
-    let remaining = 0;
-    if (leaveType === "vacation") remaining = data.vacation;
-    if (leaveType === "sick") remaining = data.personal;
-    if (leaveType === "personal") remaining = data.sick;
-
-    if (remaining <= 0) {
-      alertBox.style.display = "block";
-      alertBox.textContent = `คุณใช้สิทธิ์ลา ${document.querySelector("#leaveType option:checked").textContent} หมดแล้ว`;
-      return;
-    }
-
-    alertBox.style.display = "none";
-    submitBtn.disabled = true;
-
-    const leaveRequest = {
-      employeeId: data.employeeId,
-      name: data.name,
-      type: leaveType,
-      reason: reason,
-      from: `${startDate} ${startTime}`,
-      to: `${endDate} ${endTime}`
-    };
-
-    console.log("ส่งคำขอลา:", leaveRequest);
-    alert("ส่งคำขอลาสำเร็จ!");
-  });
-}
-  init();
+    init();
   </script>
 </body>
 </html>
