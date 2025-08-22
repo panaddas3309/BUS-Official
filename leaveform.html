@@ -134,57 +134,69 @@
     <button class="btn" id="submitBtn">ส่งคำขอลา</button>
   </div>
 
-  <script>
-    // ✅ โหลดข้อมูลจาก localStorage
-    const data = JSON.parse(localStorage.getItem("employeeData"));
+<script>
+  // ✅ โหลดข้อมูลพนักงานจาก localStorage
+  const data = JSON.parse(localStorage.getItem("employeeData"));
 
-    if (data) {
-      document.getElementById("employeeName").value = data.name || "";
-      document.getElementById("employeeId").value = data.employeeId || "";
+  if (data) {
+    document.getElementById("employeeName").value = data.name || "";
+    document.getElementById("employeeId").value = data.employeeId || "";
+  } else {
+    alert("ไม่พบข้อมูลพนักงาน กรุณากลับไปหน้า Dashboard");
+    location.href = "dashboard.html";
+  }
+
+  const alertBox = document.getElementById("alertBox");
+  const submitBtn = document.getElementById("submitBtn");
+
+  submitBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+
+    const leaveType = document.getElementById("leaveType").value;
+    const reason = document.getElementById("reason").value;
+    const startDate = document.getElementById("startDate").value;
+    const startTime = document.getElementById("startTime").value;
+    const endDate = document.getElementById("endDate").value;
+    const endTime = document.getElementById("endTime").value;
+
+    // ✅ ตรวจสอบว่าเลือกข้อมูลครบ
+    if (!leaveType || !startDate || !startTime || !endDate || !endTime) {
+      alertBox.style.display = "block";
+      alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
+      return;
     }
 
-    const alertBox = document.getElementById("alertBox");
-    const submitBtn = document.getElementById("submitBtn");
+    // ✅ ตรวจสอบสิทธิ์ลา
+    if (data[leaveType] <= 0) {
+      alertBox.style.display = "block";
+      alertBox.textContent = `คุณใช้สิทธิ์ลา ${document.querySelector("#leaveType option:checked").textContent} หมดแล้ว`;
+      return;
+    }
 
-    submitBtn.addEventListener("click", function(e) {
-      e.preventDefault();
+    // ✅ ลดสิทธิ์ลาใน localStorage
+    data[leaveType] = data[leaveType] - 1;
+    localStorage.setItem("employeeData", JSON.stringify(data));
 
-      const leaveType = document.getElementById("leaveType").value;
-      const reason = document.getElementById("reason").value;
-      const startDate = document.getElementById("startDate").value;
-      const startTime = document.getElementById("startTime").value;
-      const endDate = document.getElementById("endDate").value;
-      const endTime = document.getElementById("endTime").value;
+    alertBox.style.display = "none";
+    submitBtn.disabled = true;
 
-      if (!leaveType || !startDate || !startTime || !endDate || !endTime) {
-        alertBox.style.display = "block";
-        alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
-        return;
-      }
+    // ✅ สร้างอ็อบเจ็กต์คำขอลา
+    const leaveRequest = {
+      employeeId: data.employeeId,
+      name: data.name,
+      type: leaveType,
+      reason: reason,
+      from: `${startDate} ${startTime}`,
+      to: `${endDate} ${endTime}`
+    };
 
-      // ✅ ตรวจสอบสิทธิ์ลาเหลือไหม
-      if (data[leaveType] <= 0) {
-        alertBox.style.display = "block";
-        alertBox.textContent = `คุณใช้สิทธิ์ลา ${document.querySelector("#leaveType option:checked").textContent} หมดแล้ว`;
-        return;
-      }
+    console.log("ส่งคำขอลา:", leaveRequest);
 
-      alertBox.style.display = "none";
-      submitBtn.disabled = true;
+    alert("ส่งคำขอลาสำเร็จ!");
+    // สามารถ redirect ไปหน้า status.html หรือแสดงข้อความเพิ่ม
+    // location.href = "status.html";
+  });
+</script>
 
-      const leaveRequest = {
-        employeeId: data.employeeId,
-        name: data.name,
-        type: leaveType,
-        reason: reason,
-        from: `${startDate} ${startTime}`,
-        to: `${endDate} ${endTime}`
-      };
-
-      console.log("ส่งคำขอลา:", leaveRequest);
-
-      alert("ส่งคำขอลาสำเร็จ!");
-    });
-  </script>
 </body>
 </html>
