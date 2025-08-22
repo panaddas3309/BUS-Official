@@ -79,7 +79,7 @@
       padding: 10px;
       border-radius: 8px;
       margin-bottom: 15px;
-      display: none; /* default ซ่อน */
+      display: none;
     }
   </style>
 </head>
@@ -88,18 +88,16 @@
     <h2>ฟอร์มแจ้งลา</h2>
 
     <!-- กล่องแจ้งเตือน -->
-    <div class="alert" id="alertBox">
-      คุณใช้สิทธิ์ลา ... หมดแล้ว
-    </div>
+    <div class="alert" id="alertBox"></div>
 
     <div class="form-group">
       <label>ชื่อพนักงาน</label>
-      <input type="text" id="employeeName" value="${data.employeeName}" disabled>
+      <input type="text" id="employeeName" disabled>
     </div>
 
     <div class="form-group">
       <label>รหัสพนักงาน</label>
-      <input type="text" id="employeeId" value="${data.employeeId}" disabled>
+      <input type="text" id="employeeId" disabled>
     </div>
 
     <div class="form-group">
@@ -135,5 +133,58 @@
 
     <button class="btn" id="submitBtn">ส่งคำขอลา</button>
   </div>
+
+  <script>
+    // ✅ โหลดข้อมูลจาก localStorage
+    const data = JSON.parse(localStorage.getItem("employeeData"));
+
+    if (data) {
+      document.getElementById("employeeName").value = data.name || "";
+      document.getElementById("employeeId").value = data.employeeId || "";
+    }
+
+    const alertBox = document.getElementById("alertBox");
+    const submitBtn = document.getElementById("submitBtn");
+
+    submitBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+
+      const leaveType = document.getElementById("leaveType").value;
+      const reason = document.getElementById("reason").value;
+      const startDate = document.getElementById("startDate").value;
+      const startTime = document.getElementById("startTime").value;
+      const endDate = document.getElementById("endDate").value;
+      const endTime = document.getElementById("endTime").value;
+
+      if (!leaveType || !startDate || !startTime || !endDate || !endTime) {
+        alertBox.style.display = "block";
+        alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
+        return;
+      }
+
+      // ✅ ตรวจสอบสิทธิ์ลาเหลือไหม
+      if (data[leaveType] <= 0) {
+        alertBox.style.display = "block";
+        alertBox.textContent = `คุณใช้สิทธิ์ลา ${document.querySelector("#leaveType option:checked").textContent} หมดแล้ว`;
+        return;
+      }
+
+      alertBox.style.display = "none";
+      submitBtn.disabled = true;
+
+      const leaveRequest = {
+        employeeId: data.employeeId,
+        name: data.name,
+        type: leaveType,
+        reason: reason,
+        from: `${startDate} ${startTime}`,
+        to: `${endDate} ${endTime}`
+      };
+
+      console.log("ส่งคำขอลา:", leaveRequest);
+
+      alert("ส่งคำขอลาสำเร็จ!");
+    });
+  </script>
 </body>
 </html>
