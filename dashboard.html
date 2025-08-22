@@ -99,12 +99,29 @@
   </style>
 </head>
 <body>
-  <div class="dashboard" id="dashboard">
-    <div id="loading">
-      <div class="loader"></div>
-      <div style="margin-top:10px;color:#555;">กำลังโหลดข้อมูล...</div>
-    </div>
+<!-- Loader -->
+<div id="loading">
+  <div class="container">
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
   </div>
+
+  <!-- กรอง gooey effect -->
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <defs>
+      <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+        <feColorMatrix in="blur" mode="matrix" 
+          values="1 0 0 0 0  
+                  0 1 0 0 0  
+                  0 0 1 0 0  
+                  0 0 0 20 -10" result="goo" />
+        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+      </filter>
+    </defs>
+  </svg>
+</div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
