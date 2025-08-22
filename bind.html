@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ผูกบัญชี LineUserID</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #status {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>ผูกบัญชี LineUserID</h2>
+    <form id="bindForm">
+      <div class="form-group">
+        <label for="employeeId">EmployeeID</label>
+        <input type="text" id="employeeId" name="employeeId" placeholder="เช่น S9528" required>
+      </div>
+
+      <!-- ซ่อน LineUserID -->
+      <input type="hidden" id="lineUserId" name="lineUserId" required>
+
+      <button type="submit">ผูกบัญชี</button>
+    </form>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_w_WGCRi7NVPzS-S_wPun5QGIoSBY2g1Vzm8Rzt3-h2UjPP3YiGfP9Isz7aVVC1g3/exec';
+    const form = document.getElementById('bindForm');
+    const statusDiv = document.getElementById('status');
+
+    // ✅ เติม LineUserID อัตโนมัติจาก localStorage
+    const lineUserId = localStorage.getItem("lineUserId");
+    if (lineUserId) {
+      document.getElementById("lineUserId").value = lineUserId;
+    } else {
+      statusDiv.textContent = "❌ ไม่พบ LineUserID กรุณาเข้าสู่ระบบใหม่";
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      statusDiv.textContent = 'กำลังผูกบัญชี...';
+      const formData = new FormData(form);
+
+      fetch(SCRIPT_URL, { method: 'POST', body: formData })
+        .then(response => {
+          if (response.ok) return response.text();
+          throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+          statusDiv.textContent = '✅ ผูกบัญชีสำเร็จแล้ว! กำลังไปที่ Dashboard...';
+          setTimeout(() => {
+            window.location.href = "dashboard.html"; // ✅ Redirect หลังสำเร็จ
+          }, 1500);
+        })
+        .catch(err => {
+          statusDiv.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
+          console.error(err);
+        });
+    });
+  </script>
+</body>
+</html>
