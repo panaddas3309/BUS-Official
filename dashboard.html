@@ -1,189 +1,161 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบตรวจสอบสิทธิ์ลา</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
 
-<!-- ฟอนต์ Google Prompt -->
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    /* Loader */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 1s linear infinite;
+      margin: 50px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-<style>
-  body {
-    margin: 0;
-    font-family: 'Prompt', sans-serif;
-    background: linear-gradient(135deg, #74ebd5, #9face6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
+    /* Greeting */
+    .greeting {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
 
-  .dashboard {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-    padding: 20px;
-    width: 90%;
-    max-width: 420px;
-    text-align: center;
-    animation: fadeIn 0.6s ease-in-out;
-  }
+    .greeting-sub {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 16px;
+    }
 
-  @keyframes fadeIn {
-    from {opacity: 0; transform: translateY(8px);}
-    to {opacity: 1; transform: translateY(0);}
-  }
+    /* Table */
+    .info-table {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
 
-  .profile-pic {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 2px solid #4CAF50;
-    margin-bottom: 10px;
-  }
+    .info-table th {
+      background: #4CAF50;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
 
-  .greeting {
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 15px;
-  }
+    .info-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
 
-  .info-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 15px;
-  }
+    .info-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
 
-  .info-table th, .info-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-    font-size: 14px;
-    color: #444;
-  }
+    /* Buttons */
+    .btn-container {
+      margin-top: 20px;
+    }
 
-  .info-table th {
-    font-weight: 600;
-    background: #f1f1f1;
-  }
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      margin: 5px;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none;
+      color: white;
+    }
 
-  .btn-group {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-  }
+    .btn-leave {
+      background: #4CAF50;
+    }
 
-  .btn {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.3s;
-    color: #fff;
-  }
+    .btn-leave:hover {
+      background: #45a049;
+    }
 
-  .btn-leave {
-    background: #28a745;
-  }
+    .btn-status {
+      background: #2196F3;
+    }
 
-  .btn-leave:hover {
-    background: #218838;
-  }
-
-  .btn-status {
-    background: #007bff;
-  }
-
-  .btn-status:hover {
-    background: #0056b3;
-  }
-
-  #loading {
-    font-size: 16px;
-    color: #555;
-    padding: 20px 0;
-  }
-</style>
+    .btn-status:hover {
+      background: #1976D2;
+    }
+  </style>
 </head>
 <body>
+  <!-- Loader -->
+  <div id="loader" class="loader"></div>
 
-<div class="dashboard" id="dashboard">
-  <div id="loading">⏳ กำลังโหลดข้อมูล...</div>
-</div>
+  <!-- Content -->
+  <div id="content" style="display:none;">
+    <div class="greeting">สวัสดีคุณพนัดดา คำทะเนตร</div>
+    <div class="greeting-sub" id="greeting-sub"></div>
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script>
-const LIFF_ID = "2007956727-rbZz9a0z"; // <-- ใส่ LIFF ID ของคุณ
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+    <table class="info-table">
+      <tr><th>หัวข้อ</th><th>รายละเอียด</th></tr>
+      <tr><td>รหัสพนักงาน</td><td>EMP001</td></tr>
+      <tr><td>ชื่อ-นามสกุล</td><td>พนัดดา คำทะเนตร</td></tr>
+      <tr><td>สิทธิ์คงเหลือ</td><td>10 วัน</td></tr>
+    </table>
 
-// ข้อความทักทายสุ่ม 10 ชุด
-const greetings = [
-  "ยินดีต้อนรับเข้าสู่ระบบ!",
-  "ดีใจที่เจอคุณวันนี้!",
-  "สู้ ๆ กับวันใหม่ครับ!",
-  "ขอให้วันนี้เป็นวันที่ดี!",
-  "ยิ้มรับความท้าทายวันนี้!",
-  "ขอให้มีความสุขกับการทำงาน!",
-  "มาสำรวจสิทธิ์ลาของคุณกัน!",
-  "วันนี้ก็ทำได้ดีแน่นอนครับ!",
-  "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
-  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!",
-  "ยินดีที่ได้เจอกันอีกครั้งนะครับ!",
-  "ขอบคุณที่ตั้งใจทำงานเสมอ!",
-  "มาลุยงานกันอย่างเต็มที่เลยครับ!",
-  "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!",
-  "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
-  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!",
-  "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
-];
+    <div class="btn-container">
+      <a href="#" class="btn btn-leave">แจ้งลาออนไลน์</a>
+      <a href="#" class="btn btn-status">ตรวจสอบสถานะ</a>
+    </div>
+  </div>
 
-async function init() {
-  await liff.init({ liffId: LIFF_ID });
-  if (!liff.isLoggedIn()) liff.login();
+  <script>
+    // ข้อความทักทาย
+    const greetings = [
+      "ยินดีต้อนรับเข้าสู่ระบบ!",
+      "ดีใจที่เจอคุณวันนี้!",
+      "สู้ ๆ กับวันใหม่ครับ!",
+      "ขอให้วันนี้เป็นวันที่ดี!",
+      "ยิ้มรับความท้าทายวันนี้!",
+      "พร้อมทำงานกันเถอะ!",
+      "เชิญตรวจสอบข้อมูลของคุณ!",
+      "วันนี้คุณพร้อมหรือยัง?",
+      "ขอให้มีความสุขกับการทำงาน!",
+      "มาสำรวจสิทธิ์ลาของคุณกัน!",
+      "วันนี้เริ่มต้นด้วยพลังบวก!",
+      "คุณคือกำลังสำคัญของทีม!",
+      "ทำเต็มที่ แล้วพักผ่อนให้คุ้มค่า!",
+      "เชื่อมั่นในตัวเอง แล้วไปต่อ!",
+      "ทุกวันคือโอกาสใหม่ เริ่มเลย!"
+    ];
+    const greet = greetings[Math.floor(Math.random() * greetings.length)];
+    document.getElementById("greeting-sub").innerText = greet;
 
-  const profile = await liff.getProfile();
-  const userId = profile.userId;
-  localStorage.setItem("lineUserId", userId);
-
-  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-  let data = await res.json();
-
-  const dashboard = document.getElementById("dashboard");
-
-  if (data.bound) {
-    const greet = greetings[Math.floor(Math.random()*greetings.length)];
-    dashboard.innerHTML = `
-      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-      <div class="greeting">สวัสดีคุณ ${data.name}</div>
-      <div class="greeting-sub">พร้อมทำงานกันเถอะ!</div>
-      <table class="info-table">
-        <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
-        <tr><th>ลาพักร้อน(คงเหลือ)</th><td>${data.vacation}</td></tr>
-        <tr><th>ลากิจ(คงเหลือ)</th><td>${data.personal}</td></tr>
-        <tr><th>ลาป่วย(คงเหลือ)</th><td>${data.sick}</td></tr>
-        <tr><th>ขาดงาน(สะสม)</th><td>${data.absent}</td></tr>
-      </table>
-      <div class="btn-group">
-        <button class="btn btn-leave" onclick="location.href='leave.html'">แจ้งลาออนไลน์</button>
-        <button class="btn btn-status" onclick="location.href='status.html'">ตรวจสอบสถานะ</button>
-      </div>
-    `;
-  } else {
-    dashboard.innerHTML = `
-      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-      <div class="greeting">สวัสดีคุณ ${profile.displayName} - คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
-      <button class="btn btn-leave" onclick="location.href='bind.html'">ไปผูกบัญชี</button>
-    `;
-  }
-}
-
-init();
-</script>
-
+    // Loader
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("content").style.display = "block";
+      }, 1200);
+    };
+  </script>
 </body>
 </html>
