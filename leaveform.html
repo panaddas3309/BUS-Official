@@ -1,293 +1,349 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ฟอร์มแจ้งลา</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: #f0f2f5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .form-container {
-      width: 95%;
-      max-width: 480px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      position: relative;
-    }
-    h2 { text-align: center; margin-bottom: 20px; color:#333; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; font-weight: 500; margin-bottom: 5px; color:#555; }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    textarea { resize: vertical; min-height: 70px; }
-    .date-time-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #fff;
-      background: #007bff;
-      transition: 0.3s;
-    }
-    .btn:disabled { background: #aaa; cursor: not-allowed; }
-    .alert {
-      background: #ffefef;
-      border: 1px solid #ff5c5c;
-      color: #d63031;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      display: none;
-    }
-    .loading {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 18px;
-      font-weight: 600;
-      border-radius: 12px;
-      z-index: 10;
-    }
-    .leave-days {
-      font-size: 13px;
-      color: #555;
-      margin-top: -10px;
-      margin-bottom: 10px;
-      text-align: right;
-    }
-    .back-btn {
-      margin-bottom: 15px;
-      padding: 8px 12px;
-      font-size: 14px;
-      border-radius: 6px;
-      background: #6c757d;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ฟอร์มแจ้งลา</title>
+<style>
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #f0f4f8;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Loading overlay */
+#loadingOverlay {
+  position: fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(255,255,255,0.9);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+  font-size:18px;
+  color:#333;
+}
+
+.spinner {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #4a90e2;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-right:10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+/* Form container */
+.form-container {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+h2 { text-align: center; margin-bottom: 20px; color:#333; }
+
+.form-group { margin-bottom: 15px; position: relative; }
+
+label { display:block; font-weight:500; margin-bottom:5px; color:#555; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  font-size:14px;
+  transition: all 0.3s;
+  outline:none;
+  box-sizing:border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  border: 2px solid #4a90e2;
+  box-shadow: 0 0 8px rgba(74,144,226,0.3);
+}
+
+textarea { min-height: 80px; resize: vertical; }
+
+.date-time-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn {
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  color:#fff;
+  background: linear-gradient(90deg,#4a90e2,#357ab8);
+  position: relative;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+.btn:disabled { background:#aaa; cursor:not-allowed; }
+.btn:hover:not(:disabled) {
+  background: linear-gradient(90deg,#357ab8,#2a5d91);
+}
+
+/* Alert */
+.alert {
+  background:#ffe0e0;
+  border:1px solid #ff6b6b;
+  color:#d63031;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:15px;
+  display:none;
+  animation: fadein 0.3s ease-in-out;
+}
+
+@keyframes fadein {
+  from {opacity:0; transform:translateY(-5px);}
+  to {opacity:1; transform:translateY(0);}
+}
+
+.info-remaining {
+  font-size:13px;
+  color:#555;
+  margin-top:3px;
+}
+
+.back-btn {
+  display:block;
+  margin-top:15px;
+  text-align:center;
+  font-size:14px;
+  color:#4a90e2;
+  cursor:pointer;
+}
+</style>
 </head>
 <body>
-  <div class="form-container">
-    <div class="loading" id="loading">กำลังโหลดข้อมูล...</div>
-    
-    <button class="back-btn" onclick="location.href='dashboard.html'">⬅ กลับหน้า Dashboard</button>
-    <h2>ฟอร์มแจ้งลา</h2>
 
-    <div class="alert" id="alertBox"></div>
+<div id="loadingOverlay">
+  <div class="spinner"></div> กำลังโหลด...
+</div>
 
-    <div class="form-group">
-      <label>ชื่อพนักงาน</label>
-      <input type="text" id="employeeName" disabled>
-    </div>
+<div class="form-container" style="display:none;">
+<h2>ฟอร์มแจ้งลา</h2>
 
-    <div class="form-group">
-      <label>รหัสพนักงาน</label>
-      <input type="text" id="employeeId" disabled>
-    </div>
+<div class="alert" id="alertBox"></div>
 
-    <div class="form-group">
-      <label>ประเภทการลา</label>
-      <select id="leaveType" required>
-        <option value="">-- เลือกประเภทการลา --</option>
-        <option value="vacation">ลาพักร้อน</option>
-        <option value="sick">ลาป่วย</option>
-        <option value="personal">ลากิจ</option>
-      </select>
-    </div>
+<div class="form-group">
+  <label>ชื่อพนักงาน</label>
+  <input type="text" id="employeeName" disabled>
+</div>
 
-    <div class="form-group">
-      <label>เหตุผลเพิ่มเติม (ไม่บังคับ)</label>
-      <textarea id="reason"></textarea>
-    </div>
+<div class="form-group">
+  <label>รหัสพนักงาน</label>
+  <input type="text" id="employeeId" disabled>
+</div>
 
-    <div class="form-group">
-      <label>ตั้งแต่</label>
-      <div class="date-time-group">
-        <input type="date" id="startDate" required>
-        <input type="time" id="startTime" required>
-      </div>
-      <div class="leave-days" id="startDays"></div>
-    </div>
+<div class="form-group">
+  <label>ประเภทการลา</label>
+  <select id="leaveType" required>
+    <option value="">-- เลือกประเภทการลา --</option>
+    <option value="vacation">ลาพักร้อน</option>
+    <option value="sick">ลาป่วย</option>
+    <option value="personal">ลากิจ</option>
+  </select>
+  <div class="info-remaining" id="remainingInfo"></div>
+</div>
 
-    <div class="form-group">
-      <label>ถึง</label>
-      <div class="date-time-group">
-        <input type="date" id="endDate" required>
-        <input type="time" id="endTime" required>
-      </div>
-      <div class="leave-days" id="endDays"></div>
-    </div>
+<div class="form-group">
+  <label>เหตุผลเพิ่มเติม (ไม่บังคับ)</label>
+  <textarea id="reason"></textarea>
+</div>
 
-    <button class="btn" id="submitBtn">ส่งคำขอลา</button>
+<div class="form-group">
+  <label>ตั้งแต่</label>
+  <div class="date-time-group">
+    <input type="date" id="startDate" required>
+    <input type="time" id="startTime" required>
   </div>
+</div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const LIFF_ID = "2007956727-rbZz9a0z";
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+<div class="form-group">
+  <label>ถึง</label>
+  <div class="date-time-group">
+    <input type="date" id="endDate" required>
+    <input type="time" id="endTime" required>
+  </div>
+</div>
 
-    function calculateLeaveDays(startDate, startTime, endDate, endTime) {
-      const start = new Date(startDate + 'T' + startTime);
-      const end = new Date(endDate + 'T' + endTime);
-      if (end <= start) return 0;
+<div class="info-remaining" id="calcDaysInfo">จำนวนวันลา: 0 วัน</div>
 
-      let totalDays = 0;
-      let current = new Date(start);
-      const WORK_START = 8;
-      const WORK_END = 17;
-      const LUNCH_START = 12;
-      const LUNCH_END = 13;
+<button class="btn" id="submitBtn">ส่งคำขอลา</button>
 
-      while (current <= end) {
-        const day = current.getDay();
-        if (day !== 0) { // ไม่ใช่อาทิตย์
-          let dayStart = new Date(current);
-          dayStart.setHours(WORK_START,0,0,0);
-          let dayEnd = new Date(current);
-          dayEnd.setHours(WORK_END,0,0,0);
+<div class="back-btn" onclick="location.href='dashboard.html'">← กลับไปหน้า Dashboard</div>
+</div>
 
-          let currentStart = current > dayStart ? current : dayStart;
-          let currentEnd = end < dayEnd ? end : dayEnd;
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const LIFF_ID = "2007956727-rbZz9a0z";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
 
-          let hours = (currentEnd - currentStart)/1000/3600;
+function calculateLeaveDays(startDate, startTime, endDate, endTime) {
+  if(!startDate || !startTime || !endDate || !endTime) return 0;
+  const start = new Date(`${startDate}T${startTime}`);
+  const end = new Date(`${endDate}T${endTime}`);
+  if(end <= start) return 0;
 
-          // ลบเวลาเที่ยง
-          if (currentStart < new Date(current.setHours(LUNCH_END,0,0,0)) &&
-              currentEnd > new Date(current.setHours(LUNCH_START,0,0,0))) {
-            let lunchStartTime = new Date(current);
-            lunchStartTime.setHours(LUNCH_START,0,0,0);
-            let lunchEndTime = new Date(current);
-            lunchEndTime.setHours(LUNCH_END,0,0,0);
-            let overlapStart = currentStart > lunchStartTime ? currentStart : lunchStartTime;
-            let overlapEnd = currentEnd < lunchEndTime ? currentEnd : lunchEndTime;
-            let lunchHours = (overlapEnd - overlapStart)/1000/3600;
-            hours -= lunchHours;
-          }
+  let totalDays = 0;
+  const MS_PER_DAY = 1000*60*60*24;
 
-          totalDays += hours / (WORK_END-WORK_START);
-        }
-        current.setDate(current.getDate()+1);
-        current.setHours(0,0,0,0);
-      }
+  for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+    if(d.getDay()===0) continue; // skip Sunday
+    totalDays +=1;
+  }
 
-      return Math.round(totalDays*10)/10; // ปัดเป็นทศนิยม 0.1
+  // Adjust first day hours
+  const startHour = parseInt(startTime.split(":")[0]);
+  const startMinute = parseInt(startTime.split(":")[1]);
+  const endHour = parseInt(endTime.split(":")[0]);
+  const endMinute = parseInt(endTime.split(":")[1]);
+
+  let firstDay = 1;
+  let lastDay = 1;
+  // Check if start and end on same day
+  if(startDate === endDate){
+    let hours = (endHour + endMinute/60) - (startHour + startMinute/60);
+    if(startHour <12 && endHour>12) hours -=1; // subtract lunch 12-13
+    firstDay = hours/8;
+    totalDays = firstDay;
+  } else {
+    // Adjust first day
+    let hoursFirstDay = 17 - (startHour + startMinute/60);
+    if(startHour<12 && 17>12) hoursFirstDay -=1; // lunch
+    firstDay = hoursFirstDay/8;
+
+    // Adjust last day
+    let hoursLastDay = (endHour + endMinute/60) - 8;
+    if(endHour>12 && 8<13) hoursLastDay -=1;
+    lastDay = hoursLastDay/8;
+
+    totalDays = totalDays - 2 + firstDay + lastDay; // subtract first and last counted fully then add adjusted
+  }
+
+  return Math.round(totalDays*2)/2; // round to 0.5
+}
+
+async function init() {
+  await liff.init({ liffId: LIFF_ID });
+  if(!liff.isLoggedIn()) liff.login();
+
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+  let data = await res.json();
+
+  document.getElementById("employeeName").value = data.name;
+  document.getElementById("employeeId").value = data.employeeId;
+
+  document.getElementById("loadingOverlay").style.display="none";
+  document.querySelector(".form-container").style.display="block";
+
+  const submitBtn = document.getElementById("submitBtn");
+  const alertBox = document.getElementById("alertBox");
+  const leaveType = document.getElementById("leaveType");
+  const startDate = document.getElementById("startDate");
+  const startTime = document.getElementById("startTime");
+  const endDate = document.getElementById("endDate");
+  const endTime = document.getElementById("endTime");
+  const calcDaysInfo = document.getElementById("calcDaysInfo");
+  const remainingInfo = document.getElementById("remainingInfo");
+
+  function updateRemainingInfo() {
+    let remaining = 0;
+    const val = leaveType.value;
+    if(val==="vacation") remaining = data.vacation;
+    if(val==="sick") remaining = data.personal;
+    if(val==="personal") remaining = data.sick;
+    remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
+  }
+
+  function updateLeaveDays() {
+    const days = calculateLeaveDays(startDate.value, startTime.value, endDate.value, endTime.value);
+    calcDaysInfo.textContent = `จำนวนวันลา: ${days} วัน`;
+  }
+
+  leaveType.addEventListener("change", updateRemainingInfo);
+  startDate.addEventListener("change", updateLeaveDays);
+  startTime.addEventListener("change", updateLeaveDays);
+  endDate.addEventListener("change", updateLeaveDays);
+  endTime.addEventListener("change", updateLeaveDays);
+
+  updateRemainingInfo();
+
+  submitBtn.addEventListener("click", function(e){
+    e.preventDefault();
+    const leaveTypeValue = leaveType.value;
+    const reasonValue = document.getElementById("reason").value;
+    const days = calculateLeaveDays(startDate.value, startTime.value, endDate.value, endTime.value);
+
+    if(!leaveTypeValue || !startDate.value || !startTime.value || !endDate.value || !endTime.value){
+      alertBox.style.display="block";
+      alertBox.textContent="กรุณากรอกข้อมูลให้ครบถ้วน";
+      return;
     }
 
-    async function init() {
-      const loading = document.getElementById('loading');
-      const submitBtn = document.getElementById("submitBtn");
-      const alertBox = document.getElementById("alertBox");
-      const startDateInput = document.getElementById("startDate");
-      const startTimeInput = document.getElementById("startTime");
-      const endDateInput = document.getElementById("endDate");
-      const endTimeInput = document.getElementById("endTime");
-      const startDays = document.getElementById("startDays");
-      const endDays = document.getElementById("endDays");
+    let remaining = 0;
+    if(leaveTypeValue==="vacation") remaining = data.vacation;
+    if(leaveTypeValue==="sick") remaining = data.personal;
+    if(leaveTypeValue==="personal") remaining = data.sick;
 
-      loading.style.display = "flex";
-
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) liff.login();
-
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
-
-      let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-      let data = await res.json();
-
-      document.getElementById("employeeName").value = data.name;
-      document.getElementById("employeeId").value = data.employeeId;
-      loading.style.display = "none";
-
-      function updateLeaveDays() {
-        const start = startDateInput.value;
-        const sTime = startTimeInput.value;
-        const end = endDateInput.value;
-        const eTime = endTimeInput.value;
-
-        if(start && sTime && end && eTime) {
-          const days = calculateLeaveDays(start, sTime, end, eTime);
-          startDays.textContent = `จำนวนวันลา: ${days} วัน`;
-        } else {
-          startDays.textContent = '';
-        }
-      }
-
-      startDateInput.addEventListener("change", updateLeaveDays);
-      startTimeInput.addEventListener("change", updateLeaveDays);
-      endDateInput.addEventListener("change", updateLeaveDays);
-      endTimeInput.addEventListener("change", updateLeaveDays);
-
-      submitBtn.addEventListener("click", function(e) {
-        e.preventDefault();
-        const leaveType = document.getElementById("leaveType").value;
-        const reason = document.getElementById("reason").value;
-        const startDate = startDateInput.value;
-        const startTime = startTimeInput.value;
-        const endDate = endDateInput.value;
-        const endTime = endTimeInput.value;
-
-        if (!leaveType || !startDate || !startTime || !endDate || !endTime) {
-          alertBox.style.display = "block";
-          alertBox.textContent = "กรุณากรอกข้อมูลให้ครบถ้วน";
-          return;
-        }
-
-        let remaining = 0;
-        if (leaveType === "vacation") remaining = data.vacation;
-        if (leaveType === "sick") remaining = data.personal;
-        if (leaveType === "personal") remaining = data.sick;
-
-        const leaveDays = calculateLeaveDays(startDate,startTime,endDate,endTime);
-        if (remaining < leaveDays) {
-          alertBox.style.display = "block";
-          alertBox.textContent = `คุณมีสิทธิ์ลาเหลือ ${remaining} วัน ไม่พอสำหรับ ${leaveDays} วัน`;
-          return;
-        }
-
-        alertBox.style.display = "none";
-        submitBtn.disabled = true;
-
-        const leaveRequest = {
-          employeeId: data.employeeId,
-          name: data.name,
-          type: leaveType,
-          reason: reason,
-          from: `${startDate} ${startTime}`,
-          to: `${endDate} ${endTime}`,
-          days: leaveDays
-        };
-
-        console.log("ส่งคำขอลา:", leaveRequest);
-        alert("ส่งคำขอลาสำเร็จ!");
-      });
+    if(remaining<=0){
+      alertBox.style.display="block";
+      alertBox.textContent = `คุณใช้สิทธิ์ลา ${leaveType.options[leaveType.selectedIndex].textContent} หมดแล้ว`;
+      return;
     }
 
-    init();
-  </script>
+    if(days>remaining){
+      alertBox.style.display="block";
+      alertBox.textContent = `คุณเลือกวันลามากกว่าสิทธิ์คงเหลือ`;
+      return;
+    }
+
+    alertBox.style.display="none";
+    submitBtn.disabled=true;
+
+    const leaveRequest = {
+      employeeId: data.employeeId,
+      name: data.name,
+      type: leaveTypeValue,
+      reason: reasonValue,
+      from: `${startDate.value} ${startTime.value}`,
+      to: `${endDate.value} ${endTime.value}`,
+      days: days
+    };
+
+    console.log("ส่งคำขอลา:", leaveRequest);
+    alert("ส่งคำขอลาสำเร็จ!");
+  });
+}
+
+init();
+</script>
 </body>
 </html>
