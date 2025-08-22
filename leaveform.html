@@ -204,59 +204,14 @@ textarea { min-height: 80px; resize: vertical; }
 const LIFF_ID = "2007956727-rbZz9a0z";
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
 
-function calculateLeaveDays(startDate, startTime, endDate, endTime) {
-  if(!startDate || !startTime || !endDate || !endTime) return 0;
-  const start = new Date(`${startDate}T${startTime}`);
-  const end = new Date(`${endDate}T${endTime}`);
-  if(end <= start) return 0;
-
-  let totalDays = 0;
-  const MS_PER_DAY = 1000*60*60*24;
-
-  for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
-    if(d.getDay()===0) continue; // skip Sunday
-    totalDays +=1;
-  }
-
-  // Adjust first day hours
-  const startHour = parseInt(startTime.split(":")[0]);
-  const startMinute = parseInt(startTime.split(":")[1]);
-  const endHour = parseInt(endTime.split(":")[0]);
-  const endMinute = parseInt(endTime.split(":")[1]);
-
-  let firstDay = 1;
-  let lastDay = 1;
-  // Check if start and end on same day
-  if(startDate === endDate){
-    let hours = (endHour + endMinute/60) - (startHour + startMinute/60);
-    if(startHour <12 && endHour>12) hours -=1; // subtract lunch 12-13
-    firstDay = hours/8;
-    totalDays = firstDay;
-  } else {
-    // Adjust first day
-    let hoursFirstDay = 17 - (startHour + startMinute/60);
-    if(startHour<12 && 17>12) hoursFirstDay -=1; // lunch
-    firstDay = hoursFirstDay/8;
-
-    // Adjust last day
-    let hoursLastDay = (endHour + endMinute/60) - 8;
-    if(endHour>12 && 8<13) hoursLastDay -=1;
-    lastDay = hoursLastDay/8;
-
-    totalDays = totalDays - 2 + firstDay + lastDay; // subtract first and last counted fully then add adjusted
-  }
-
-  return Math.round(totalDays*2)/2; // round to 0.5
-}
-
 async function init() {
   await liff.init({ liffId: LIFF_ID });
   if(!liff.isLoggedIn()) liff.login();
 
   const profile = await liff.getProfile();
   const userId = profile.userId;
-  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-  let data = await res.json();
+  const res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+  const data = await res.json();
 
   document.getElementById("employeeName").value = data.name;
   document.getElementById("employeeId").value = data.employeeId;
@@ -274,54 +229,100 @@ async function init() {
   const calcDaysInfo = document.getElementById("calcDaysInfo");
   const remainingInfo = document.getElementById("remainingInfo");
 
-  function updateRemainingInfo() {
+  // แสดงสิทธิ์คงเหลือ
+  function updateRemainingInfo(){
     let remaining = 0;
-    const val = leaveType.value;
-    if(val==="vacation") remaining = data.vacation;
-    if(val==="sick") remaining = data.personal;
-    if(val==="personal") remaining = data.sick;
+    if(leaveType.value==="vacation") remaining = data.vacation;
+    if(leaveType.value==="sick") remaining = data.personal;
+    if(leaveType.value==="personal") remaining = data.sick;
     remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
   }
 
-  function updateLeaveDays() {
-    const days = calculateLeaveDays(startDate.value, startTime.value, endDate.value, endTime.value);
-    calcDaysInfo.textContent = `จำนวนวันลา: ${days} วัน`;
+  leaveType.addEventListener("change", updateRemainingInfo);
+  updateRemainingInfo();
+
+  // คำนวณจำนวนวันลา
+  function calculateLeaveDays(sDate,sTime,eDate,eTime){
+    if(!sDate || !sTime || !eDate || !eTime) return 0;
+    const WORK_HOURS_PER_DAY = 8;
+    const start = new Date(`${sDate}T${sTime}`);
+    const end = new Date(`${eDate}T${eTime}`);
+    if(end <= start) return 0;
+
+    let totalHours = 0;
+    let current = new Date(start);
+    current.setHours(0,0,0,0);
+
+    while(current <= end){
+      if(current.getDay()!==0){ // skip Sunday
+        let dayStart = new Date(current);
+        let dayEnd = new Date(current);
+        dayStart.setHours(8,0,0,0);
+        dayEnd.setHours(17,0,0,0);
+
+        let currentStart = (current > dayStart) ? current : dayStart;
+        let currentEnd = (end < dayEnd) ? end : dayEnd;
+
+        // เช้า 8-12
+        let morningStart = new Date(current); morningStart.setHours(8,0,0,0);
+        let morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
+        let morningHours = 0;
+        if(currentStart < morningEnd && currentEnd > morningStart){
+          let overlapStart = (currentStart>morningStart)?currentStart:morningStart;
+          let overlapEnd = (currentEnd<morningEnd)?currentEnd:morningEnd;
+          morningHours = (overlapEnd-overlapStart)/1000/3600;
+        }
+
+        // บ่าย 13-17
+        let afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
+        let afternoonEnd = new Date(current); afternoonEnd.setHours(17,0,0,0);
+        let afternoonHours = 0;
+        if(currentStart < afternoonEnd && currentEnd > afternoonStart){
+          let overlapStart = (currentStart>afternoonStart)?currentStart:afternoonStart;
+          let overlapEnd = (currentEnd<afternoonEnd)?currentEnd:afternoonEnd;
+          afternoonHours = (overlapEnd-overlapStart)/1000/3600;
+        }
+
+        totalHours += morningHours+afternoonHours;
+      }
+      current.setDate(current.getDate()+1);
+      current.setHours(0,0,0,0);
+    }
+
+    return Math.round((totalHours/WORK_HOURS_PER_DAY)*10)/10; // ปัดทศนิยม 0.1
   }
 
-  leaveType.addEventListener("change", updateRemainingInfo);
-  startDate.addEventListener("change", updateLeaveDays);
-  startTime.addEventListener("change", updateLeaveDays);
-  endDate.addEventListener("change", updateLeaveDays);
-  endTime.addEventListener("change", updateLeaveDays);
-
-  updateRemainingInfo();
+  // Update วันลาเรียลไทม์
+  [startDate,startTime,endDate,endTime].forEach(el=>{
+    el.addEventListener("change",()=>{
+      const days = calculateLeaveDays(startDate.value,startTime.value,endDate.value,endTime.value);
+      calcDaysInfo.textContent = `จำนวนวันลา: ${days} วัน`;
+    });
+  });
 
   submitBtn.addEventListener("click", function(e){
     e.preventDefault();
+
     const leaveTypeValue = leaveType.value;
     const reasonValue = document.getElementById("reason").value;
-    const days = calculateLeaveDays(startDate.value, startTime.value, endDate.value, endTime.value);
+    const days = calculateLeaveDays(startDate.value,startTime.value,endDate.value,endTime.value);
 
+    // กรอกครบไหม
     if(!leaveTypeValue || !startDate.value || !startTime.value || !endDate.value || !endTime.value){
       alertBox.style.display="block";
       alertBox.textContent="กรุณากรอกข้อมูลให้ครบถ้วน";
       return;
     }
 
+    // ตรวจสอบสิทธิ์คงเหลือ
     let remaining = 0;
     if(leaveTypeValue==="vacation") remaining = data.vacation;
     if(leaveTypeValue==="sick") remaining = data.personal;
     if(leaveTypeValue==="personal") remaining = data.sick;
 
-    if(remaining<=0){
-      alertBox.style.display="block";
-      alertBox.textContent = `คุณใช้สิทธิ์ลา ${leaveType.options[leaveType.selectedIndex].textContent} หมดแล้ว`;
-      return;
-    }
-
     if(days>remaining){
       alertBox.style.display="block";
-      alertBox.textContent = `คุณเลือกวันลามากกว่าสิทธิ์คงเหลือ`;
+      alertBox.textContent=`คุณใช้สิทธิ์ลา ${leaveType.options[leaveType.selectedIndex].text} ไม่เพียงพอ`;
       return;
     }
 
