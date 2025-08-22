@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+
+<!-- ฟอนต์ Google Prompt -->
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    font-family: 'Prompt', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #9face6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .dashboard {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    padding: 20px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(8px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  .profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #4CAF50;
+    margin-bottom: 10px;
+  }
+
+  .greeting {
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+  }
+
+  .info-table th, .info-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    font-size: 14px;
+    color: #444;
+  }
+
+  .info-table th {
+    font-weight: 600;
+    background: #f1f1f1;
+  }
+
+  .btn-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+    color: #fff;
+  }
+
+  .btn-leave {
+    background: #28a745;
+  }
+
+  .btn-leave:hover {
+    background: #218838;
+  }
+
+  .btn-status {
+    background: #007bff;
+  }
+
+  .btn-status:hover {
+    background: #0056b3;
+  }
+
+  #loading {
+    font-size: 16px;
+    color: #555;
+    padding: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard" id="dashboard">
+  <div id="loading">⏳ กำลังโหลดข้อมูล...</div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const LIFF_ID = "2007956727-rbZz9a0z"; // <-- ใส่ LIFF ID ของคุณ
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+
+// ข้อความทักทายสุ่ม 10 ชุด
+const greetings = [
+  "ยินดีต้อนรับเข้าสู่ระบบ!",
+  "ดีใจที่เจอคุณวันนี้!",
+  "สู้ ๆ กับวันใหม่ครับ!",
+  "ขอให้วันนี้เป็นวันที่ดี!",
+  "ยิ้มรับความท้าทายวันนี้!",
+  "พร้อมทำงานกันเถอะ!",
+  "เชิญตรวจสอบข้อมูลของคุณ!",
+  "วันนี้คุณพร้อมหรือยัง?",
+  "ขอให้มีความสุขกับการทำงาน!",
+  "มาสำรวจสิทธิ์ลาของคุณกัน!"
+];
+
+async function init() {
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) liff.login();
+
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+  localStorage.setItem("lineUserId", userId);
+
+  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+  let data = await res.json();
+
+  const dashboard = document.getElementById("dashboard");
+
+  if (data.bound) {
+    const greet = greetings[Math.floor(Math.random()*greetings.length)];
+    dashboard.innerHTML = `
+      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+      <div class="greeting">สวัสดีคุณ ${data.name} - ${greet}</div>
+      <table class="info-table">
+        <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
+        <tr><th>ลาพักร้อน</th><td>${data.vacation}</td></tr>
+        <tr><th>ลากิจ</th><td>${data.personal}</td></tr>
+        <tr><th>ลาป่วย</th><td>${data.sick}</td></tr>
+        <tr><th>ขาดงาน</th><td>${data.absent}</td></tr>
+      </table>
+      <div class="btn-group">
+        <button class="btn btn-leave" onclick="location.href='leave.html'">แจ้งลาออนไลน์</button>
+        <button class="btn btn-status" onclick="location.href='status.html'">ตรวจสอบสถานะ</button>
+      </div>
+    `;
+  } else {
+    dashboard.innerHTML = `
+      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+      <div class="greeting">สวัสดีคุณ ${profile.displayName} - คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
+      <button class="btn btn-leave" onclick="location.href='bind.html'">ไปผูกบัญชี</button>
+    `;
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
