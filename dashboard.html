@@ -1,182 +1,240 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
-  <!-- ฟอนต์ Google Prompt -->
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Prompt', sans-serif;
-      background: linear-gradient(135deg, #74ebd5, #9face6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .dashboard {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-      padding: 20px;
-      width: 90%;
-      max-width: 420px;
-      text-align: center;
-      animation: fadeIn 0.6s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(8px);}
-      to {opacity: 1; transform: translateY(0);}
-    }
-    .profile-pic {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 2px solid #4CAF50;
-      margin-bottom: 10px;
-    }
-    .greeting {
-      font-size: 18px;
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 5px;
-    }
-    .greeting-sub {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 15px;
-    }
-    .info-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 15px;
-    }
-    .info-table th, .info-table td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      width: 50%;
-      text-align: center;
-    }
-    .info-table th {
-      font-weight: normal;
-      background: #f1f1f1;
-    }
-    .btn-group {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: 0.3s;
-      color: #fff;
-    }
-    .btn-leave { background: #28a745; }
-    .btn-leave:hover { background: #218838; }
-    .btn-status { background: #007bff; }
-    .btn-status:hover { background: #0056b3; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<!-- ฟอนต์ Google Prompt -->
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Prompt', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #9face6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
 
-    /* Loader แบบเดิม */
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #4CAF50;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;
-      margin: 50px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+  .dashboard {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    padding: 20px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    display: none; /* ซ่อนก่อน Loader เสร็จ */
+  }
 
-    #loading-text {
-      font-size: 16px;
-      color: #555;
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
+  .profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #4CAF50;
+    margin-bottom: 10px;
+  }
+
+  .greeting {
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  .greeting-sub {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+  }
+
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+  }
+
+  .info-table th, .info-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    width: 50%;
+    text-align: center;
+  }
+
+  .info-table th {
+    font-weight: normal;
+    background: #f1f1f1;
+  }
+
+  .btn-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+    color: #fff;
+  }
+
+  .btn-leave { background: #28a745; }
+  .btn-leave:hover { background: #218838; }
+  .btn-status { background: #007bff; }
+  .btn-status:hover { background: #0056b3; }
+
+  /* Loader Gooey */
+  #loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .container {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    filter: url("#goo");
+    animation: rotate-move 2s ease-in-out infinite;
+  }
+
+  .dot {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    margin: auto;
+  }
+
+  .dot-1 { background-color: #ffc400; animation: dot-1-move 2s ease infinite, index 6s -2s ease infinite; }
+  .dot-2 { background-color: #0051ff; animation: dot-2-move 2s ease infinite, index 6s -4s ease infinite; }
+  .dot-3 { background-color: #ff1717; animation: dot-3-move 2s ease infinite, index 6s ease infinite; }
+
+  @keyframes dot-1-move {
+    20% { transform: scale(1); }
+    45% { transform: translate(16px, 12px) scale(0.45); }
+    60% { transform: translate(80px, 60px) scale(0.45); }
+    80% { transform: translate(80px, 60px) scale(0.45); }
+    100% { transform: translateY(0px) scale(1); }
+  }
+
+  @keyframes dot-2-move {
+    20% { transform: scale(1); }
+    45% { transform: translate(-16px, 12px) scale(0.45); }
+    60% { transform: translate(-80px, 60px) scale(0.45); }
+    80% { transform: translate(-80px, 60px) scale(0.45); }
+    100% { transform: translateY(0px) scale(1); }
+  }
+
+  @keyframes dot-3-move {
+    20% { transform: scale(1); }
+    45% { transform: translateY(-18px) scale(0.45); }
+    60% { transform: translateY(-90px) scale(0.45); }
+    80% { transform: translateY(-90px) scale(0.45); }
+    100% { transform: translateY(0px) scale(1); }
+  }
+
+  @keyframes rotate-move {
+    55% { transform: rotate(0deg); }
+    80% { transform: rotate(360deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes index {
+    0%, 100% { z-index: 3; }
+    33.3% { z-index: 2; }
+    66.6% { z-index: 1; }
+  }
+
+</style>
 </head>
 <body>
-  <!-- Loader -->
-  <div id="loading">
-    <div class="loader"></div>
-    <div id="loading-text">⏳ กำลังโหลดข้อมูล...</div>
+
+<!-- Loader Gooey -->
+<div id="loading">
+  <div class="container">
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
   </div>
+  <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="goo">
+        <feGaussianBlur result="blur" stdDeviation="10" in="SourceGraphic"></feGaussianBlur>
+        <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 21 -7" mode="matrix" in="blur"></feColorMatrix>
+      </filter>
+    </defs>
+  </svg>
+</div>
 
-  <div class="dashboard" id="dashboard" style="display:none;"></div>
+<div class="dashboard" id="dashboard"></div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const LIFF_ID = "2007956727-rbZz9a0z"; // <-- ใส่ LIFF ID ของคุณ
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const LIFF_ID = "2007956727-rbZz9a0z";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
 
-    // ข้อความทักทายสุ่ม
-    const greetings = [
-      "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
-      "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
-      "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
-      "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
-      "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
-      "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
-    ];
+const greetings = [
+  "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
+  "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
+  "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
+  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
+  "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
+  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
+];
 
-    async function init() {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) liff.login();
+async function init() {
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) liff.login();
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+  localStorage.setItem("lineUserId", userId);
 
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
-      localStorage.setItem("lineUserId", userId);
+  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+  let data = await res.json();
+  const dashboard = document.getElementById("dashboard");
 
-      let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-      let data = await res.json();
-      const dashboard = document.getElementById("dashboard");
-      const loader = document.getElementById("loading");
+  if (data.bound) {
+    const greet = greetings[Math.floor(Math.random()*greetings.length)];
+    dashboard.innerHTML = `
+      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+      <div class="greeting">สวัสดีคุณ ${data.name}</div>
+      <div class="greeting-sub">${greet}</div>
+      <table class="info-table">
+        <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
+        <tr><th>ลาพักร้อน(คงเหลือ)</th><td>${data.vacation}</td></tr>
+        <tr><th>ลาป่วย(คงเหลือ)</th><td>${data.personal}</td></tr>
+        <tr><th>ลากิจ(คงเหลือ)</th><td>${data.sick}</td></tr>
+        <tr><th>ขาดงาน(สะสม)</th><td>${data.absent}</td></tr>
+      </table>
+      <div class="btn-group">
+        <button class="btn btn-leave" onclick="location.href='leave.html'">แจ้งลาออนไลน์</button>
+        <button class="btn btn-status" onclick="location.href='status.html'">ตรวจสอบสถานะ</button>
+      </div>
+    `;
+  } else {
+    dashboard.innerHTML = `
+      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+      <div class="greeting">สวัสดีคุณ ${profile.displayName} - คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
+      <button class="btn btn-leave" onclick="location.href='bind.html'">ไปผูกบัญชี</button>
+    `;
+  }
 
-      // เลือกข้อความทักทายสุ่ม
-      const greet = greetings[Math.floor(Math.random() * greetings.length)];
+  // ซ่อน Loader และโชว์ Dashboard
+  document.getElementById("loading").style.display = "none";
+  dashboard.style.display = "block";
+}
 
-      loader.style.display = "none";       // ซ่อน Loader
-      dashboard.style.display = "block";   // แสดง Dashboard
-
-      if (data.bound) {
-        dashboard.innerHTML = `
-          <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-          <div class="greeting">สวัสดีคุณ ${data.name}</div>
-          <div class="greeting-sub">${greet}</div>
-          <table class="info-table">
-            <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
-            <tr><th>ลาพักร้อน(คงเหลือ)</th><td>${data.vacation}</td></tr>
-            <tr><th>ลาป่วย(คงเหลือ)</th><td>${data.personal}</td></tr>
-            <tr><th>ลากิจ(คงเหลือ)</th><td>${data.sick}</td></tr>
-            <tr><th>ขาดงาน(สะสม)</th><td>${data.absent}</td></tr>
-          </table>
-          <div class="btn-group">
-            <button class="btn btn-leave" onclick="location.href='leave.html'">แจ้งลาออนไลน์</button>
-            <button class="btn btn-status" onclick="location.href='status.html'">ตรวจสอบสถานะ</button>
-          </div>
-        `;
-      } else {
-        dashboard.innerHTML = `
-          <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-          <div class="greeting">สวัสดีคุณ ${profile.displayName} - คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
-          <button class="btn btn-leave" onclick="location.href='bind.html'">ไปผูกบัญชี</button>
-        `;
-      }
-    }
-
-    init();
-  </script>
+init();
+</script>
 </body>
 </html>
