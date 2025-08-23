@@ -339,11 +339,11 @@ async function init() {
       days: days
     };
         // 🔗 ส่งไปบันทึกที่ Google Sheet
-        fetch('https://script.google.com/macros/s/AKfycbw0v-7DfPXI_8u_8pfNehaKv7QF_xKsdhxhbAlzQMOLyYyPen6fE4aNYf0iLsDdsVox/exec', {
-          method: "POST",
-          body: JSON.stringify(leaveRequest),
-          headers: {"Content-Type": "application/json"}
-        })
+      fetch('https://script.google.com/macros/s/AKfycbw0v-7DfPXI_8u_8pfNehaKv7QF_xKsdhxhbAlzQMOLyYyPen6fE4aNYf0iLsDdsVox/exec', {
+        method: "POST",
+        body: JSON.stringify(leaveRequest),
+        headers: {"Content-Type": "application/json"}
+      })
         .then(res => res.json())
         .then(response => {
           if(response.status==="success"){
