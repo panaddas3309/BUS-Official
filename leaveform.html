@@ -214,9 +214,9 @@ async function init() {
 
   function updateRemainingInfo(){
 let remaining = 0;
-  if(leaveType.value==="vacation") remaining = data.vacation;
-  if(leaveType.value==="sick") remaining = data.sick;
-  if(leaveType.value==="personal") remaining = data.personal;
+if (leaveTypeValue === "vacation") remaining = data.vacation;
+if (leaveTypeValue === "sick") remaining = data.personal;   // สลับ
+if (leaveTypeValue === "personal") remaining = data.sick;   // สลับ
   remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
   }
 
@@ -277,9 +277,9 @@ function calculateLeaveDays(sDate, sTime, eDate, eTime){
     }
 
     let remaining = 0;
-    if(leaveTypeValue==="vacation") remaining = data.vacation;
-    if(leaveTypeValue==="sick") remaining = data.sick;
-    if(leaveTypeValue==="personal") remaining = data.personal;
+    if (leaveTypeValue === "vacation") remaining = data.vacation;
+    if (leaveTypeValue === "sick") remaining = data.personal;   // สลับ
+    if (leaveTypeValue === "personal") remaining = data.sick;   // สลับ
 
     if(days>remaining){
       alertBox.style.display="block";
