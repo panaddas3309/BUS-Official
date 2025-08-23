@@ -1,69 +1,126 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>ประวัติการลา</title>
-  <style>
-    /* สไตล์สำหรับตาราง */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 8px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ประวัติการลา</title>
+<style>
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  margin:0;
+  padding:0;
+  background:#f0f4f8;
+}
+.container {
+  max-width: 480px;
+  margin: 20px auto;
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  box-sizing:border-box;
+}
+h2 {
+  text-align:center;
+  margin-bottom:15px;
+  color:#333;
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+thead {
+  background:#4a90e2;
+  color:#fff;
+}
+th, td {
+  padding:8px;
+  border:1px solid #ccc;
+  text-align:center;
+}
+tbody tr:nth-child(even) {
+  background:#f9f9f9;
+}
+.loading {
+  text-align:center;
+  margin:20px 0;
+  font-size:16px;
+  color:#555;
+}
+</style>
 </head>
 <body>
+
+<div class="container">
   <h2>ประวัติการลา</h2>
-  <table id="leaveHistory">
+  <div class="loading" id="loading">กำลังโหลดข้อมูล...</div>
+  <table id="leaveHistory" style="display:none;">
     <thead>
       <tr>
         <th>รหัสพนักงาน</th>
         <th>ชื่อ-สกุล</th>
         <th>ประเภทการลา</th>
-        <th>วันที่ลา (เริ่ม)</th>
-        <th>เวลา (เริ่ม)</th>
-        <th>วันที่ลา (สิ้นสุด)</th>
-        <th>เวลา (สิ้นสุด)</th>
+        <th>วันที่เริ่ม</th>
+        <th>เวลาเริ่ม</th>
+        <th>วันที่สิ้นสุด</th>
+        <th>เวลาสิ้นสุด</th>
         <th>จำนวนวัน</th>
-        <th>สถานะ</th>
+        <th>Status</th>
         <th>วันที่ทำรายการ</th>
         <th>เหตุผล</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- ข้อมูลจะถูกแทรกที่นี่ -->
-    </tbody>
+    <tbody></tbody>
   </table>
+</div>
 
-  <script>
-    async function fetchLeaveHistory() {
-      const lineUserId = 'LINE_USER_ID'; // แทนที่ด้วย Line User ID ของผู้ใช้
-      const url = `https://script.google.com/macros/s/AKfycbx6NL3E35vEwNES6STmGD_xA_h66vIy1aHiS484NyjS_AMOzBM4DBInwPGSCYQLQ7-C/exec?lineUserId=${lineUserId}`;
-      
-      const response = await fetch(url);
-      const leaveData = await response.json();
-      
-      const tableBody = document.querySelector('#leaveHistory tbody');
-      leaveData.forEach(row => {
-        const tr = document.createElement('tr');
-        row.forEach(cell => {
-          const td = document.createElement('td');
-          td.textContent = cell;
-          tr.appendChild(td);
-        });
-        tableBody.appendChild(tr);
-      });
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const LIFF_ID = "2007956727-rbZz9a0z"; // เปลี่ยนเป็น LIFF ID ของคุณ
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6NL3E35vEwNES6STmGD_xA_h66vIy1aHiS484NyjS_AMOzBM4DBInwPGSCYQLQ7-C/exec";
+
+async function loadLeaveHistory() {
+  await liff.init({ liffId: LIFF_ID });
+  if(!liff.isLoggedIn()) liff.login();
+
+  const profile = await liff.getProfile();
+  const lineUserId = profile.userId;
+
+  try {
+    const res = await fetch(`${SCRIPT_URL}?lineUserId=${lineUserId}`);
+    const data = await res.json();
+
+    const table = document.getElementById('leaveHistory');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+
+    if(data.length === 0){
+      document.getElementById('loading').textContent = "ไม่พบประวัติการลา";
+      return;
     }
 
-    fetchLeaveHistory();
-  </script>
+    data.forEach(row => {
+      const tr = document.createElement('tr');
+      row.forEach(cell => {
+        const td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('loading').style.display = 'none';
+    table.style.display = 'table';
+
+  } catch(err){
+    console.error(err);
+    document.getElementById('loading').textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+  }
+}
+
+loadLeaveHistory();
+</script>
+
 </body>
 </html>
-
