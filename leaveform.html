@@ -15,8 +15,6 @@ body {
   align-items: center;
   min-height: 100vh;
 }
-
-/* Loading overlay */
 #loadingOverlay {
   position: fixed;
   top:0; left:0; width:100%; height:100%;
@@ -28,7 +26,6 @@ body {
   font-size:18px;
   color:#333;
 }
-
 .spinner {
   border: 5px solid #f3f3f3;
   border-top: 5px solid #4a90e2;
@@ -38,13 +35,10 @@ body {
   animation: spin 1s linear infinite;
   margin-right:10px;
 }
-
 @keyframes spin {
   0% { transform: rotate(0deg);}
   100% { transform: rotate(360deg);}
 }
-
-/* Form container */
 .form-container {
   width: 100%;
   max-width: 480px;
@@ -55,13 +49,9 @@ body {
   box-sizing: border-box;
   overflow: hidden;
 }
-
 h2 { text-align: center; margin-bottom: 20px; color:#333; }
-
 .form-group { margin-bottom: 15px; position: relative; }
-
 label { display:block; font-weight:500; margin-bottom:5px; color:#555; }
-
 input, select, textarea {
   width: 100%;
   padding: 12px;
@@ -72,20 +62,16 @@ input, select, textarea {
   outline:none;
   box-sizing:border-box;
 }
-
 input:focus, select:focus, textarea:focus {
   border: 2px solid #4a90e2;
   box-shadow: 0 0 8px rgba(74,144,226,0.3);
 }
-
 textarea { min-height: 80px; resize: vertical; }
-
 .date-time-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
-
 .btn {
   width:100%;
   padding:14px;
@@ -100,13 +86,10 @@ textarea { min-height: 80px; resize: vertical; }
   overflow: hidden;
   transition: 0.3s;
 }
-
 .btn:disabled { background:#aaa; cursor:not-allowed; }
 .btn:hover:not(:disabled) {
   background: linear-gradient(90deg,#357ab8,#2a5d91);
 }
-
-/* Alert */
 .alert {
   background:#ffe0e0;
   border:1px solid #ff6b6b;
@@ -117,18 +100,15 @@ textarea { min-height: 80px; resize: vertical; }
   display:none;
   animation: fadein 0.3s ease-in-out;
 }
-
 @keyframes fadein {
   from {opacity:0; transform:translateY(-5px);}
   to {opacity:1; transform:translateY(0);}
 }
-
 .info-remaining {
   font-size:13px;
   color:#555;
   margin-top:3px;
 }
-
 .back-btn {
   display:block;
   margin-top:15px;
@@ -202,7 +182,8 @@ textarea { min-height: 80px; resize: vertical; }
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 const LIFF_ID = "2007956727-rbZz9a0z";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+const SCRIPT_URL_GET = "https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec";
+const SCRIPT_URL_POST = "https://script.google.com/macros/s/AKfycbwePTritUAnTzRPo6hS8jhiG3YUrJJghESn2EZoFyGBDXnDUlkuY02iihX9_CNlyxCP/exec";
 
 async function init() {
   await liff.init({ liffId: LIFF_ID });
@@ -210,7 +191,8 @@ async function init() {
 
   const profile = await liff.getProfile();
   const userId = profile.userId;
-  const res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+
+  const res = await fetch(`${SCRIPT_URL_GET}?lineUserId=${userId}`);
   const data = await res.json();
 
   document.getElementById("employeeName").value = data.name;
@@ -229,19 +211,17 @@ async function init() {
   const calcDaysInfo = document.getElementById("calcDaysInfo");
   const remainingInfo = document.getElementById("remainingInfo");
 
-  // แสดงสิทธิ์คงเหลือ
   function updateRemainingInfo(){
     let remaining = 0;
     if(leaveType.value==="vacation") remaining = data.vacation;
-    if(leaveType.value==="sick") remaining = data.personal;
-    if(leaveType.value==="personal") remaining = data.sick;
+    if(leaveType.value==="sick") remaining = data.sick;
+    if(leaveType.value==="personal") remaining = data.personal;
     remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
   }
 
   leaveType.addEventListener("change", updateRemainingInfo);
   updateRemainingInfo();
 
-  // คำนวณจำนวนวันลา
   function calculateLeaveDays(sDate,sTime,eDate,eTime){
     if(!sDate || !sTime || !eDate || !eTime) return 0;
     const WORK_HOURS_PER_DAY = 8;
@@ -254,16 +234,12 @@ async function init() {
     current.setHours(0,0,0,0);
 
     while(current <= end){
-      if(current.getDay()!==0){ // skip Sunday
-        let dayStart = new Date(current);
-        let dayEnd = new Date(current);
-        dayStart.setHours(8,0,0,0);
-        dayEnd.setHours(17,0,0,0);
-
+      if(current.getDay()!==0){
+        let dayStart = new Date(current); dayStart.setHours(8,0,0,0);
+        let dayEnd = new Date(current); dayEnd.setHours(17,0,0,0);
         let currentStart = (current > dayStart) ? current : dayStart;
         let currentEnd = (end < dayEnd) ? end : dayEnd;
 
-        // เช้า 8-12
         let morningStart = new Date(current); morningStart.setHours(8,0,0,0);
         let morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
         let morningHours = 0;
@@ -273,7 +249,6 @@ async function init() {
           morningHours = (overlapEnd-overlapStart)/1000/3600;
         }
 
-        // บ่าย 13-17
         let afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
         let afternoonEnd = new Date(current); afternoonEnd.setHours(17,0,0,0);
         let afternoonHours = 0;
@@ -288,11 +263,9 @@ async function init() {
       current.setDate(current.getDate()+1);
       current.setHours(0,0,0,0);
     }
-
-    return Math.round((totalHours/WORK_HOURS_PER_DAY)*10)/10; // ปัดทศนิยม 0.1
+    return Math.round((totalHours/WORK_HOURS_PER_DAY)*10)/10;
   }
 
-  // Update วันลาเรียลไทม์
   [startDate,startTime,endDate,endTime].forEach(el=>{
     el.addEventListener("change",()=>{
       const days = calculateLeaveDays(startDate.value,startTime.value,endDate.value,endTime.value);
@@ -300,21 +273,18 @@ async function init() {
     });
   });
 
-  submitBtn.addEventListener("click", function(e){
+  submitBtn.addEventListener("click", async function(e){
     e.preventDefault();
-
     const leaveTypeValue = leaveType.value;
     const reasonValue = document.getElementById("reason").value;
     const days = calculateLeaveDays(startDate.value,startTime.value,endDate.value,endTime.value);
 
-    // กรอกครบไหม
     if(!leaveTypeValue || !startDate.value || !startTime.value || !endDate.value || !endTime.value){
       alertBox.style.display="block";
       alertBox.textContent="กรุณากรอกข้อมูลให้ครบถ้วน";
       return;
     }
 
-    // ตรวจสอบสิทธิ์คงเหลือ
     let remaining = 0;
     if(leaveTypeValue==="vacation") remaining = data.vacation;
     if(leaveTypeValue==="sick") remaining = data.sick;
@@ -339,9 +309,27 @@ async function init() {
       days: days
     };
 
-    console.log("ส่งคำขอลา:", leaveRequest);
-    alert("ส่งคำขอลาสำเร็จ!");
+    try {
+      const response = await fetch(SCRIPT_URL_POST, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(leaveRequest)
+      });
+      const result = await response.json();
+
+      if(result.status === "success"){
+        alert("ส่งคำขอลาสำเร็จ!");
+        location.reload();
+      } else {
+        throw new Error("เกิดข้อผิดพลาดในการส่งข้อมูล");
+      }
+    } catch (err) {
+      alertBox.style.display="block";
+      alertBox.textContent = "ส่งคำขอลาไม่สำเร็จ: " + err.message;
+      submitBtn.disabled=false;
+    }
   });
+
 }
 
 init();
