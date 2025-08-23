@@ -297,7 +297,8 @@ async function init() {
       reason: reasonValue,
       from: `${startDate.value} ${startTime.value}`,
       to: `${endDate.value} ${endTime.value}`,
-      days: days
+      days: days,
+      lineUserId: data.lineUserId 
     };
 
     try {
