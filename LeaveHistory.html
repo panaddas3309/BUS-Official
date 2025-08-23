@@ -19,6 +19,19 @@
       padding: 15px;
       font-size: 20px;
       font-weight: bold;
+      position: relative;
+    }
+    .back-btn {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: white;
+      color: #4a90e2;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
     }
     .container {
       padding: 10px;
@@ -34,10 +47,6 @@
       margin: 4px 0;
       font-size: 14px;
     }
-    .label {
-      font-weight: bold;
-      color: #333;
-    }
     .status {
       font-weight: bold;
       padding: 3px 6px;
@@ -50,11 +59,28 @@
   </style>
 </head>
 <body>
-  <header>📋 ประวัติการลา</header>
-  <div class="container" id="leave-history">กำลังโหลดข้อมูล...</div>
+  <header>
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">⬅ กลับ</button>
+    📋 ประวัติการลา
+  </header>
+  <div class="container" id="leave-data">กำลังโหลดข้อมูล...</div>
 
 <script>
   const scriptUrl = "https://script.google.com/macros/s/AKfycbyp7k6FlaWz36jn_D1y4l9S-Lo2UEULONr5sQMf81UWQp9AhIGx1L4GV08_p6vNkXQm/exec";
+
+  // ฟังก์ชันแปลงวันที่
+  function formatDate(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  // ฟังก์ชันแปลงเวลา
+  function formatTime(timeStr) {
+    if (!timeStr) return "-";
+    const d = new Date(timeStr);
+    return d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+  }
 
   liff.init({ liffId: "2007956727-rbZz9a0z" }).then(() => {
     if (!liff.isLoggedIn()) {
@@ -63,31 +89,34 @@
       liff.getProfile().then(profile => {
         const lineUserId = profile.userId;
 
-        // ✅ ใช้ LineUserID ตัว L ใหญ่
         fetch(scriptUrl + "?LineUserID=" + lineUserId)
           .then(res => res.json())
           .then(data => {
-            const container = document.getElementById("leave-history"); // ✅ แก้ตรงนี้
-            container.innerHTML = ""; // ล้างข้อความ "กำลังโหลดข้อมูล..."
+            const container = document.getElementById("leave-data");
+            container.innerHTML = "";
 
             if (data.length === 0) {
-              container.innerHTML = "<p style='text-align:center;color:#888'>❌ ไม่พบข้อมูลการลา</p>";
-            } else {
-              data.forEach(item => {
-                const card = `
-                  <div class="card">
-                    <p><span class="label">ชื่อ-สกุล:</span> ${item["ชื่อ-สกุล"]}</p>
-                    <p><span class="label">ประเภทการลา:</span> ${item["ประเภทการลา"]}</p>
-                    <p><span class="label">วันที่ลา:</span> ${item["วันที่ลา(เริ่ม)"]} ถึง ${item["วันที่ลา(สิ้นสุด)"]}</p>
-                    <p><span class="label">เวลา:</span> ${item["เวลา(เริ่ม)"]} - ${item["เวลา(สิ้นสุด)"]}</p>
-                    <p><span class="label">จำนวนวัน:</span> ${item["จำนวนวัน"]}</p>
-                    <p><span class="label">Status:</span> <span class="status ${item["Status"].toLowerCase()}">${item["Status"]}</span></p>
-                    <p><span class="label">วันที่ทำรายการ:</span> ${item["วันที่ทำรายการ"]}</p>
-                  </div>
-                `;
-                container.innerHTML += card;
-              });
+              container.innerHTML = "<p class='text-center text-gray-500'>❌ ไม่พบข้อมูลการลา</p>";
+              return;
             }
+
+            // ✅ เรียงลำดับตามวันที่ทำรายการ ล่าสุดอยู่บนสุด
+            data.sort((a, b) => new Date(b["วันที่ทำรายการ"]) - new Date(a["วันที่ทำรายการ"]));
+
+            data.forEach(item => {
+              const card = `
+                <div class="card">
+                  <p><strong>ชื่อ-สกุล:</strong> ${item["ชื่อ-สกุล"]}</p>
+                  <p><strong>ประเภทการลา:</strong> ${item["ประเภทการลา"]}</p>
+                  <p><strong>วันที่ลา:</strong> ${formatDate(item["วันที่ลา(เริ่ม)"])} ถึง ${formatDate(item["วันที่ลา(สิ้นสุด)"])}</p>
+                  <p><strong>เวลา:</strong> ${formatTime(item["เวลา(เริ่ม)"])} - ${formatTime(item["เวลา(สิ้นสุด)"])}</p>
+                  <p><strong>จำนวนวัน:</strong> ${item["จำนวนวัน"]}</p>
+                  <p><strong>Status:</strong> <span class="status ${item["Status"]}">${item["Status"]}</span></p>
+                  <p><strong>วันที่ทำรายการ:</strong> ${formatDate(item["วันที่ทำรายการ"])} ${formatTime(item["วันที่ทำรายการ"])}</p>
+                </div>
+              `;
+              container.innerHTML += card;
+            });
           });
       });
     }
