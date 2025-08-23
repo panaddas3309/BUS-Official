@@ -145,8 +145,8 @@ textarea { min-height: 80px; resize: vertical; }
   <select id="leaveType" required>
     <option value="">-- เลือกประเภทการลา --</option>
     <option value="vacation">ลาพักร้อน</option>
-    <option value="sick">ลาป่วย</option>
     <option value="personal">ลากิจ</option>
+    <option value="sick">ลาป่วย</option>
   </select>
   <div class="info-remaining" id="remainingInfo"></div>
 </div>
@@ -212,11 +212,11 @@ async function init() {
   const remainingInfo = document.getElementById("remainingInfo");
 
   function updateRemainingInfo(){
-    let remaining = 0;
-    if(leaveType.value==="vacation") remaining = data.vacation;
-    if(leaveType.value==="sick") remaining = data.sick;
-    if(leaveType.value==="personal") remaining = data.personal;
-    remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
+let remaining = 0;
+  if(leaveType.value==="vacation") remaining = data.vacation;
+  if(leaveType.value==="sick") remaining = data.sick;
+  if(leaveType.value==="personal") remaining = data.personal;
+  remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
   }
 
   leaveType.addEventListener("change", updateRemainingInfo);
