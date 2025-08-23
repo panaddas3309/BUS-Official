@@ -63,66 +63,63 @@
 
   <!-- โหลด LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbwzVNwYMXE8bJnuNnwUCBJEaYDHDKBamf-2prPjgDjiIdE0GrkZUix3F3_fX4KTwNcf/exec"; // URL ของ Google Apps Script
-    const liffId = "2007956727-rbZz9a0z"; // ใส่ LIFF ID ของคุณ
+<script>
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbwzVNwYMXE8bJnuNnwUCBJEaYDHDKBamf-2prPjgDjiIdE0GrkZUix3F3_fX4KTwNcf/exec";
+  const liffId = "2007956727-rbZz9a0z";
 
-    async function fetchLeaveHistory(lineUserId) {
-      try {
-        const response = await fetch(`${scriptUrl}?LineUserID=${lineUserId}`);
-        const data = await response.json();
-        document.getElementById("loading").style.display = "none";
+  async function fetchLeaveHistory(lineUserId) {
+    try {
+      const response = await fetch(`${scriptUrl}?LineUserID=${lineUserId}`);
+      const data = await response.json();
+      document.getElementById("loading").style.display = "none";
 
-        if (!data.length) {
-          document.getElementById("error").textContent = "ไม่พบข้อมูลการลา";
-          document.getElementById("error").style.display = "block";
-          return;
-        }
-
-        // สร้าง header table จาก key ของ JSON
-        const headers = Object.keys(data[0]);
-        const tableHead = document.getElementById("tableHead");
-        const headRow = document.createElement("tr");
-        headers.forEach(h => {
-          const th = document.createElement("th");
-          th.textContent = h;
-          headRow.appendChild(th);
-        });
-        tableHead.appendChild(headRow);
-
-        // ใส่ข้อมูล
-        const tableBody = document.getElementById("tableBody");
-        data.forEach(row => {
-          const tr = document.createElement("tr");
-          headers.forEach(h => {
-            const td = document.createElement("td");
-            td.textContent = row[h] ?? "";
-            tr.appendChild(td);
-          });
-          tableBody.appendChild(tr);
-        });
-
-        document.getElementById("leaveTable").style.display = "table";
-      } catch (err) {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("error").textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+      if (!data.length) {
+        document.getElementById("error").textContent = "ไม่พบข้อมูลการลา";
         document.getElementById("error").style.display = "block";
+        return;
       }
-    }
 
-    // เริ่ม LIFF
-    async function initLiff() {
-      await liff.init({ liffId });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      } else {
-        const profile = await liff.getProfile();
-        const lineUserId = profile.userId; // ได้ userId จริง
-        fetchLeaveHistory(lineUserId);
-      }
-    }
+      const headers = Object.keys(data[0]);
+      const tableHead = document.getElementById("tableHead");
+      const headRow = document.createElement("tr");
+      headers.forEach(h => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        headRow.appendChild(th);
+      });
+      tableHead.appendChild(headRow);
 
-    initLiff();
-  </script>
+      const tableBody = document.getElementById("tableBody");
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        headers.forEach(h => {
+          const td = document.createElement("td");
+          td.textContent = row[h] ?? "";
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+
+      document.getElementById("leaveTable").style.display = "table";
+    } catch (err) {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("error").textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+      document.getElementById("error").style.display = "block";
+    }
+  }
+
+  async function initLiff() {
+    await liff.init({ liffId });
+    if (!liff.isLoggedIn()) {
+      liff.login();
+    } else {
+      const profile = await liff.getProfile();
+      fetchLeaveHistory(profile.userId);
+    }
+  }
+
+  initLiff();
+</script>
+
 </body>
 </html>
