@@ -53,74 +53,46 @@
   <header>📋 ประวัติการลา</header>
   <div class="container" id="leave-history">กำลังโหลดข้อมูล...</div>
 
-  <script>
-    const liffId = "2007956727-rbZz9a0z";
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbyp7k6FlaWz36jn_D1y4l9S-Lo2UEULONr5sQMf81UWQp9AhIGx1L4GV08_p6vNkXQm/exec";
+<script>
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbyp7k6FlaWz36jn_D1y4l9S-Lo2UEULONr5sQMf81UWQp9AhIGx1L4GV08_p6vNkXQm/exec";
 
-    async function main() {
-      await liff.init({ liffId });
+  liff.init({ liffId: "2007956727-rbZz9a0z" }).then(() => {
+    if (!liff.isLoggedIn()) {
+      liff.login();
+    } else {
+      liff.getProfile().then(profile => {
+        const lineUserId = profile.userId;
 
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
+        // ✅ ใช้ LineUserID ตัว L ใหญ่
+        fetch(scriptUrl + "?LineUserID=" + lineUserId)
+          .then(res => res.json())
+          .then(data => {
+            const container = document.getElementById("leave-history"); // ✅ แก้ตรงนี้
+            container.innerHTML = ""; // ล้างข้อความ "กำลังโหลดข้อมูล..."
 
-      const profile = await liff.getProfile();
-      const lineUserId = profile.userId;
-
-      fetch(scriptUrl + "?lineUserId=" + lineUserId)
-        .then(res => res.json())
-        .then(data => {
-          const container = document.getElementById("leave-history");
-          container.innerHTML = "";
-
-          if (data.length === 0) {
-            container.innerHTML = "<p>❌ ไม่พบข้อมูลการลา</p>";
-            return;
-          }
-
-          data.forEach(row => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-              <p><span class="label">ชื่อ-สกุล:</span> ${row["ชื่อ-สกุล"]}</p>
-              <p><span class="label">ประเภทการลา:</span> ${row["ประเภทการลา"]}</p>
-              <p><span class="label">วันที่ลา(เริ่ม):</span> ${formatDate(row["วันที่ลา(เริ่ม)"])}</p>
-              <p><span class="label">เวลา(เริ่ม):</span> ${formatTime(row["เวลา(เริ่ม)"])}</p>
-              <p><span class="label">วันที่ลา(สิ้นสุด):</span> ${formatDate(row["วันที่ลา(สิ้นสุด)"])}</p>
-              <p><span class="label">เวลา(สิ้นสุด):</span> ${formatTime(row["เวลา(สิ้นสุด)"])}</p>
-              <p><span class="label">จำนวนวัน:</span> ${row["จำนวนวัน"]}</p>
-              <p><span class="label">สถานะ:</span> <span class="status ${row["Status"].toLowerCase()}">${row["Status"]}</span></p>
-              <p><span class="label">วันที่ทำรายการ:</span> ${formatDateTime(row["วันที่ทำรายการ"])}</p>
-            `;
-            container.appendChild(card);
+            if (data.length === 0) {
+              container.innerHTML = "<p style='text-align:center;color:#888'>❌ ไม่พบข้อมูลการลา</p>";
+            } else {
+              data.forEach(item => {
+                const card = `
+                  <div class="card">
+                    <p><span class="label">ชื่อ-สกุล:</span> ${item["ชื่อ-สกุล"]}</p>
+                    <p><span class="label">ประเภทการลา:</span> ${item["ประเภทการลา"]}</p>
+                    <p><span class="label">วันที่ลา:</span> ${item["วันที่ลา(เริ่ม)"]} ถึง ${item["วันที่ลา(สิ้นสุด)"]}</p>
+                    <p><span class="label">เวลา:</span> ${item["เวลา(เริ่ม)"]} - ${item["เวลา(สิ้นสุด)"]}</p>
+                    <p><span class="label">จำนวนวัน:</span> ${item["จำนวนวัน"]}</p>
+                    <p><span class="label">Status:</span> <span class="status ${item["Status"].toLowerCase()}">${item["Status"]}</span></p>
+                    <p><span class="label">วันที่ทำรายการ:</span> ${item["วันที่ทำรายการ"]}</p>
+                  </div>
+                `;
+                container.innerHTML += card;
+              });
+            }
           });
-        })
-        .catch(err => {
-          document.getElementById("leave-history").innerHTML = "⚠️ โหลดข้อมูลล้มเหลว";
-          console.error(err);
-        });
+      });
     }
+  });
+</script>
 
-    function formatDate(dateStr) {
-      if (!dateStr) return "-";
-      const date = new Date(dateStr);
-      return date.toLocaleDateString("th-TH");
-    }
-
-    function formatTime(timeStr) {
-      if (!timeStr) return "-";
-      const date = new Date(timeStr);
-      return date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
-    }
-
-    function formatDateTime(dateTimeStr) {
-      if (!dateTimeStr) return "-";
-      const date = new Date(dateTimeStr);
-      return date.toLocaleString("th-TH");
-    }
-
-    main();
-  </script>
 </body>
 </html>
