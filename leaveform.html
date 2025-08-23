@@ -222,49 +222,39 @@ async function init() {
   leaveType.addEventListener("change", updateRemainingInfo);
   updateRemainingInfo();
 
-  function calculateLeaveDays(sDate,sTime,eDate,eTime){
-    if(!sDate || !sTime || !eDate || !eTime) return 0;
-    const WORK_HOURS_PER_DAY = 8;
-    const start = new Date(`${sDate}T${sTime}`);
-    const end = new Date(`${eDate}T${eTime}`);
-    if(end <= start) return 0;
+function calculateLeaveDays(sDate, sTime, eDate, eTime){
+  if(!sDate || !sTime || !eDate || !eTime) return 0;
 
-    let totalHours = 0;
-    let current = new Date(start);
-    current.setHours(0,0,0,0);
+  const WORK_HOURS_PER_DAY = 8;
+  const start = new Date(`${sDate}T${sTime}`);
+  const end = new Date(`${eDate}T${eTime}`);
+  if(end <= start) return 0;
 
-    while(current <= end){
-      if(current.getDay()!==0){
-        let dayStart = new Date(current); dayStart.setHours(8,0,0,0);
-        let dayEnd = new Date(current); dayEnd.setHours(17,0,0,0);
-        let currentStart = (current > dayStart) ? current : dayStart;
-        let currentEnd = (end < dayEnd) ? end : dayEnd;
+  let totalHours = 0;
+  let current = new Date(start);
+  current.setHours(0,0,0,0);
 
-        let morningStart = new Date(current); morningStart.setHours(8,0,0,0);
-        let morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
-        let morningHours = 0;
-        if(currentStart < morningEnd && currentEnd > morningStart){
-          let overlapStart = (currentStart>morningStart)?currentStart:morningStart;
-          let overlapEnd = (currentEnd<morningEnd)?currentEnd:morningEnd;
-          morningHours = (overlapEnd-overlapStart)/1000/3600;
-        }
+  while(current <= end){
+    const dayOfWeek = current.getDay();
+    if(dayOfWeek !== 0){ // skip Sunday
+      const morningStart = new Date(current); morningStart.setHours(8,0,0,0);
+      const morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
+      const afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
+      const afternoonEnd = new Date(current); afternoonEnd.setHours(17,0,0,0);
 
-        let afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
-        let afternoonEnd = new Date(current); afternoonEnd.setHours(17,0,0,0);
-        let afternoonHours = 0;
-        if(currentStart < afternoonEnd && currentEnd > afternoonStart){
-          let overlapStart = (currentStart>afternoonStart)?currentStart:afternoonStart;
-          let overlapEnd = (currentEnd<afternoonEnd)?currentEnd:afternoonEnd;
-          afternoonHours = (overlapEnd-overlapStart)/1000/3600;
-        }
+      // คำนวณชั่วโมงเช้า
+      let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 3600;
+      // คำนวณชั่วโมงบ่าย
+      let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 3600;
 
-        totalHours += morningHours+afternoonHours;
-      }
-      current.setDate(current.getDate()+1);
-      current.setHours(0,0,0,0);
+      totalHours += overlapMorning + overlapAfternoon;
     }
-    return Math.round((totalHours/WORK_HOURS_PER_DAY)*10)/10;
+    current.setDate(current.getDate()+1);
+    current.setHours(0,0,0,0);
   }
+
+  return Math.round((totalHours/WORK_HOURS_PER_DAY)*10)/10; // ปัดทศนิยม 0.1 วัน
+}
 
   [startDate,startTime,endDate,endTime].forEach(el=>{
     el.addEventListener("change",()=>{
