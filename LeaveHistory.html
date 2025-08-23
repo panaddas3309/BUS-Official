@@ -1,128 +1,158 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ประวัติการลา</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f6f9;
-    }
-    header {
-      background: #4CAF50;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      font-size: 14px;
-    }
-    th {
-      background: #f2f2f2;
-      text-align: center;
-    }
-    tr:nth-child(even) {
-      background: #fafafa;
-    }
-    .container {
-      padding: 10px;
-      overflow-x: auto;
-    }
-    .loading, .error {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 16px;
-    }
-    .loading { color: #888; }
-    .error { color: red; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ประวัติการลา</title>
+<style>
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #f0f4f8;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 480px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #333;
+}
+#historyTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+#historyTable th, #historyTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+#historyTable th {
+  background-color: #4a90e2;
+  color: #fff;
+}
+#loadingOverlay {
+  position: fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(255,255,255,0.9);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+  font-size:18px;
+  color:#333;
+}
+.spinner {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #4a90e2;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-right:10px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+.back-btn {
+  display:block;
+  margin-top:15px;
+  text-align:center;
+  font-size:14px;
+  color:#4a90e2;
+  cursor:pointer;
+}
+</style>
 </head>
 <body>
-  <header>ประวัติการลา</header>
-  <div class="container">
-    <div id="loading" class="loading">กำลังโหลดข้อมูล...</div>
-    <div id="error" class="error" style="display:none;"></div>
-    <table id="leaveTable" style="display:none;">
-      <thead id="tableHead"></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
 
-  <!-- โหลด LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbwzVNwYMXE8bJnuNnwUCBJEaYDHDKBamf-2prPjgDjiIdE0GrkZUix3F3_fX4KTwNcf/exec"; // ใส่ WebApp URL ของ Google Script
-    const liffId = "2007956727-rbZz9a0z";       // ใส่ LIFF ID ของคุณ
+<div id="loadingOverlay">
+  <div class="spinner"></div> กำลังโหลด...
+</div>
 
-    async function fetchLeaveHistory(lineUserId) {
-      try {
-        const response = await fetch(`${scriptUrl}?LineUserID=${lineUserId}`);
-        const data = await response.json();
-        document.getElementById("loading").style.display = "none";
+<div class="container" style="display:none;">
+<h2>ประวัติการลา</h2>
 
-        if (!data.length) {
-          document.getElementById("error").textContent = "ไม่พบข้อมูลการลา";
-          document.getElementById("error").style.display = "block";
-          return;
-        }
+<table id="historyTable">
+  <thead>
+    <tr>
+      <th>รหัส</th>
+      <th>ชื่อ-สกุล</th>
+      <th>ประเภทการลา</th>
+      <th>วันที่ลา(เริ่ม)</th>
+      <th>เวลา(เริ่ม)</th>
+      <th>วันที่ลา(สิ้นสุด)</th>
+      <th>เวลา(สิ้นสุด)</th>
+      <th>จำนวนวัน</th>
+      <th>Status</th>
+      <th>วันที่ทำรายการ</th>
+      <th>เหตุผล</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-        // สร้าง header table จาก key ของ JSON
-        const headers = Object.keys(data[0]);
-        const tableHead = document.getElementById("tableHead");
-        const headRow = document.createElement("tr");
-        headers.forEach(h => {
-          const th = document.createElement("th");
-          th.textContent = h;
-          headRow.appendChild(th);
-        });
-        tableHead.appendChild(headRow);
+<div class="back-btn" onclick="location.href='dashboard.html'">← กลับไปหน้า Dashboard</div>
+</div>
 
-        // ใส่ข้อมูล
-        const tableBody = document.getElementById("tableBody");
-        data.forEach(row => {
-          const tr = document.createElement("tr");
-          headers.forEach(h => {
-            const td = document.createElement("td");
-            td.textContent = row[h] ?? "";
-            tr.appendChild(td);
-          });
-          tableBody.appendChild(tr);
-        });
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const LIFF_ID = "2007956727-rbZz9a0z";
+const SCRIPT_URL_GET = "https://script.google.com/macros/s/AKfycbwzVNwYMXE8bJnuNnwUCBJEaYDHDKBamf-2prPjgDjiIdE0GrkZUix3F3_fX4KTwNcf/exec"; // เปลี่ยนเป็น URL GET Script ของคุณ
 
-        document.getElementById("leaveTable").style.display = "table";
-      } catch (err) {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("error").textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
-        document.getElementById("error").style.display = "block";
-      }
-    }
+async function init() {
+  await liff.init({ liffId: LIFF_ID });
+  if(!liff.isLoggedIn()) liff.login();
 
-    // เริ่ม LIFF
-    async function initLiff() {
-      await liff.init({ liffId });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      } else {
-        const profile = await liff.getProfile();
-        const lineUserId = profile.userId; // << ได้ userId จริง
-        fetchLeaveHistory(lineUserId);
-      }
-    }
+  const profile = await liff.getProfile();
+  const lineUserId = profile.userId;
 
-    initLiff();
-  </script>
+  try {
+    const res = await fetch(`${SCRIPT_URL_GET}?lineUserId=${lineUserId}`);
+    let data = await res.json();
+
+    // กรองเฉพาะ Row ที่ LineUserID ตรงกัน
+    data = data.filter(row => row.lineUserId === lineUserId);
+
+    const tbody = document.querySelector("#historyTable tbody");
+    tbody.innerHTML = "";
+
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row.employeeId}</td>
+        <td>${row.name}</td>
+        <td>${row.type}</td>
+        <td>${row.fromDate}</td>
+        <td>${row.fromTime}</td>
+        <td>${row.toDate}</td>
+        <td>${row.toTime}</td>
+        <td>${row.days}</td>
+        <td>${row.status}</td>
+        <td>${row.submitDate}</td>
+        <td>${row.reason}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("loadingOverlay").style.display="none";
+    document.querySelector(".container").style.display="block";
+
+  } catch(err) {
+    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message);
+  }
+}
+
+init();
+</script>
+
 </body>
 </html>
