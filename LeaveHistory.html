@@ -1,126 +1,128 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ประวัติการลา</title>
-<style>
-body {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  margin:0;
-  padding:0;
-  background:#f0f4f8;
-}
-.container {
-  max-width: 480px;
-  margin: 20px auto;
-  background:#fff;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  box-sizing:border-box;
-}
-h2 {
-  text-align:center;
-  margin-bottom:15px;
-  color:#333;
-}
-table {
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-}
-thead {
-  background:#4a90e2;
-  color:#fff;
-}
-th, td {
-  padding:8px;
-  border:1px solid #ccc;
-  text-align:center;
-}
-tbody tr:nth-child(even) {
-  background:#f9f9f9;
-}
-.loading {
-  text-align:center;
-  margin:20px 0;
-  font-size:16px;
-  color:#555;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ประวัติการลา</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f9;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      font-size: 14px;
+    }
+    th {
+      background: #f2f2f2;
+      text-align: center;
+    }
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+    .container {
+      padding: 10px;
+      overflow-x: auto;
+    }
+    .loading, .error {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    .loading { color: #888; }
+    .error { color: red; }
+  </style>
 </head>
 <body>
+  <header>ประวัติการลา</header>
+  <div class="container">
+    <div id="loading" class="loading">กำลังโหลดข้อมูล...</div>
+    <div id="error" class="error" style="display:none;"></div>
+    <table id="leaveTable" style="display:none;">
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
-<div class="container">
-  <h2>ประวัติการลา</h2>
-  <div class="loading" id="loading">กำลังโหลดข้อมูล...</div>
-  <table id="leaveHistory" style="display:none;">
-    <thead>
-      <tr>
-        <th>รหัสพนักงาน</th>
-        <th>ชื่อ-สกุล</th>
-        <th>ประเภทการลา</th>
-        <th>วันที่เริ่ม</th>
-        <th>เวลาเริ่ม</th>
-        <th>วันที่สิ้นสุด</th>
-        <th>เวลาสิ้นสุด</th>
-        <th>จำนวนวัน</th>
-        <th>Status</th>
-        <th>วันที่ทำรายการ</th>
-        <th>เหตุผล</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+  <!-- โหลด LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbwzVNwYMXE8bJnuNnwUCBJEaYDHDKBamf-2prPjgDjiIdE0GrkZUix3F3_fX4KTwNcf/exec"; // ใส่ WebApp URL ของ Google Script
+    const liffId = "2007956727-rbZz9a0z";       // ใส่ LIFF ID ของคุณ
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script>
-const LIFF_ID = "2007956727-rbZz9a0z"; // เปลี่ยนเป็น LIFF ID ของคุณ
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6NL3E35vEwNES6STmGD_xA_h66vIy1aHiS484NyjS_AMOzBM4DBInwPGSCYQLQ7-C/exec";
+    async function fetchLeaveHistory(lineUserId) {
+      try {
+        const response = await fetch(`${scriptUrl}?LineUserID=${lineUserId}`);
+        const data = await response.json();
+        document.getElementById("loading").style.display = "none";
 
-async function loadLeaveHistory() {
-  await liff.init({ liffId: LIFF_ID });
-  if(!liff.isLoggedIn()) liff.login();
+        if (!data.length) {
+          document.getElementById("error").textContent = "ไม่พบข้อมูลการลา";
+          document.getElementById("error").style.display = "block";
+          return;
+        }
 
-  const profile = await liff.getProfile();
-  const lineUserId = profile.userId;
+        // สร้าง header table จาก key ของ JSON
+        const headers = Object.keys(data[0]);
+        const tableHead = document.getElementById("tableHead");
+        const headRow = document.createElement("tr");
+        headers.forEach(h => {
+          const th = document.createElement("th");
+          th.textContent = h;
+          headRow.appendChild(th);
+        });
+        tableHead.appendChild(headRow);
 
-  try {
-    const res = await fetch(`${SCRIPT_URL}?lineUserId=${lineUserId}`);
-    const data = await res.json();
+        // ใส่ข้อมูล
+        const tableBody = document.getElementById("tableBody");
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          headers.forEach(h => {
+            const td = document.createElement("td");
+            td.textContent = row[h] ?? "";
+            tr.appendChild(td);
+          });
+          tableBody.appendChild(tr);
+        });
 
-    const table = document.getElementById('leaveHistory');
-    const tbody = table.querySelector('tbody');
-    tbody.innerHTML = '';
-
-    if(data.length === 0){
-      document.getElementById('loading').textContent = "ไม่พบประวัติการลา";
-      return;
+        document.getElementById("leaveTable").style.display = "table";
+      } catch (err) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("error").textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+        document.getElementById("error").style.display = "block";
+      }
     }
 
-    data.forEach(row => {
-      const tr = document.createElement('tr');
-      row.forEach(cell => {
-        const td = document.createElement('td');
-        td.textContent = cell;
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
+    // เริ่ม LIFF
+    async function initLiff() {
+      await liff.init({ liffId });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      } else {
+        const profile = await liff.getProfile();
+        const lineUserId = profile.userId; // << ได้ userId จริง
+        fetchLeaveHistory(lineUserId);
+      }
+    }
 
-    document.getElementById('loading').style.display = 'none';
-    table.style.display = 'table';
-
-  } catch(err){
-    console.error(err);
-    document.getElementById('loading').textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
-  }
-}
-
-loadLeaveHistory();
-</script>
-
+    initLiff();
+  </script>
 </body>
 </html>
