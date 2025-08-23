@@ -339,11 +339,12 @@ async function init() {
       days: days
     };
         // 🔗 ส่งไปบันทึกที่ Google Sheet
-      fetch('https://script.google.com/macros/s/AKfycbz064Etiw3255vnq-6baRuZKgZy10VrE1S-S4TNS8LGSHKEPOuwAHKiZ4E8CoRwq33m/exec', {
-        method: "POST",
-        body: JSON.stringify(leaveRequest),
-        headers: {"Content-Type": "application/json"}
-      })
+// หรือใช้ URL ที่ถูกต้องสำหรับ doPost โดยตรง
+        fetch('https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec', {
+            method: "POST",
+            body: JSON.stringify(leaveRequest),
+            headers: {"Content-Type": "application/json"}
+        })
         .then(res => res.json())
         .then(response => {
           if(response.status==="success"){
