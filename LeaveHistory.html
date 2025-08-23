@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ประวัติการลา</title>
+  <style>
+    /* สไตล์สำหรับตาราง */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h2>ประวัติการลา</h2>
+  <table id="leaveHistory">
+    <thead>
+      <tr>
+        <th>รหัสพนักงาน</th>
+        <th>ชื่อ-สกุล</th>
+        <th>ประเภทการลา</th>
+        <th>วันที่ลา (เริ่ม)</th>
+        <th>เวลา (เริ่ม)</th>
+        <th>วันที่ลา (สิ้นสุด)</th>
+        <th>เวลา (สิ้นสุด)</th>
+        <th>จำนวนวัน</th>
+        <th>สถานะ</th>
+        <th>วันที่ทำรายการ</th>
+        <th>เหตุผล</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- ข้อมูลจะถูกแทรกที่นี่ -->
+    </tbody>
+  </table>
+
+  <script>
+    async function fetchLeaveHistory() {
+      const lineUserId = 'LINE_USER_ID'; // แทนที่ด้วย Line User ID ของผู้ใช้
+      const url = `https://script.google.com/macros/s/AKfycbx6NL3E35vEwNES6STmGD_xA_h66vIy1aHiS484NyjS_AMOzBM4DBInwPGSCYQLQ7-C/exec?lineUserId=${lineUserId}`;
+      
+      const response = await fetch(url);
+      const leaveData = await response.json();
+      
+      const tableBody = document.querySelector('#leaveHistory tbody');
+      leaveData.forEach(row => {
+        const tr = document.createElement('tr');
+        row.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+    }
+
+    fetchLeaveHistory();
+  </script>
+</body>
+</html>
 
