@@ -233,8 +233,8 @@ async function init() {
   function updateRemainingInfo(){
     let remaining = 0;
     if(leaveType.value==="vacation") remaining = data.vacation;
-    if(leaveType.value==="sick") remaining = data.sick;
-    if(leaveType.value==="personal") remaining = data.personal;
+    if(leaveType.value==="sick") remaining = data.personal;
+    if(leaveType.value==="personal") remaining = data.sick;
     remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
   }
 
@@ -317,8 +317,8 @@ async function init() {
     // ตรวจสอบสิทธิ์คงเหลือ
     let remaining = 0;
     if(leaveTypeValue==="vacation") remaining = data.vacation;
-    if(leaveTypeValue==="sick") remaining = data.personal;
-    if(leaveTypeValue==="personal") remaining = data.sick;
+    if(leaveTypeValue==="sick") remaining = data.sick;
+    if(leaveTypeValue==="personal") remaining = data.personal;
 
     if(days>remaining){
       alertBox.style.display="block";
@@ -338,31 +338,13 @@ async function init() {
       to: `${endDate.value} ${endTime.value}`,
       days: days
     };
-        // 🔗 ส่งไปบันทึกที่ Google Sheet
-// หรือใช้ URL ที่ถูกต้องสำหรับ doPost โดยตรง
-        fetch('https://script.google.com/macros/s/AKfycbzkFIZc4BcOy9GqN9KyaJosXpfjgklM3LW-b4Na2F-2pofoFeiGqaKGwKxpauNnv0pt/exec', {
-            method: "POST",
-            body: JSON.stringify(leaveRequest),
-            headers: {"Content-Type": "application/json"}
-        })
-        .then(res => res.json())
-        .then(response => {
-          if(response.status==="success"){
-            alert("ส่งคำขอลาสำเร็จ และบันทึกเรียบร้อย!");
-          } else {
-            alert("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
-            submitBtn.disabled=false;
-          }
-        })
-        .catch(err=>{
-          console.error(err);
-          alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
-          submitBtn.disabled=false;
-        });
-      });
-    }
-    
-    init();
-    </script>
+
+    console.log("ส่งคำขอลา:", leaveRequest);
+    alert("ส่งคำขอลาสำเร็จ!");
+  });
+}
+
+init();
+</script>
 </body>
 </html>
