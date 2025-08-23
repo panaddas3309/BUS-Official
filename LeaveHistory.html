@@ -4,122 +4,123 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ประวัติการลา</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: "Tahoma", sans-serif;
       margin: 0;
       padding: 0;
-      background: #f4f6f9;
+      background: #f5f6fa;
     }
     header {
-      background: #4CAF50;
+      background: #4a90e2;
       color: white;
+      text-align: center;
       padding: 15px;
-      text-align: center;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      font-size: 14px;
-    }
-    th {
-      background: #f2f2f2;
-      text-align: center;
-    }
-    tr:nth-child(even) {
-      background: #fafafa;
     }
     .container {
       padding: 10px;
-      overflow-x: auto;
     }
-    .loading, .error {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 16px;
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .loading { color: #888; }
-    .error { color: red; }
+    .card p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+    .label {
+      font-weight: bold;
+      color: #333;
+    }
+    .status {
+      font-weight: bold;
+      padding: 3px 6px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .status.pending { background: #f1c40f; color: white; }
+    .status.approved { background: #27ae60; color: white; }
+    .status.rejected { background: #e74c3c; color: white; }
   </style>
 </head>
 <body>
-  <header>ประวัติการลา</header>
-  <div class="container">
-    <div id="loading" class="loading">กำลังโหลดข้อมูล...</div>
-    <div id="error" class="error" style="display:none;"></div>
-    <table id="leaveTable" style="display:none;">
-      <thead id="tableHead"></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+  <header>📋 ประวัติการลา</header>
+  <div class="container" id="leave-history">กำลังโหลดข้อมูล...</div>
 
-  <!-- โหลด LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script>
-  const scriptUrl = "https://script.google.com/macros/s/AKfycbyp7k6FlaWz36jn_D1y4l9S-Lo2UEULONr5sQMf81UWQp9AhIGx1L4GV08_p6vNkXQm/exec";
-  const liffId = "2007956727-rbZz9a0z";
+  <script>
+    const liffId = "2007956727-rbZz9a0z";
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbyp7k6FlaWz36jn_D1y4l9S-Lo2UEULONr5sQMf81UWQp9AhIGx1L4GV08_p6vNkXQm/exec";
 
-  async function fetchLeaveHistory(lineUserId) {
-    try {
-      const response = await fetch(`${scriptUrl}?LineUserID=${lineUserId}`);
-      const data = await response.json();
-      document.getElementById("loading").style.display = "none";
+    async function main() {
+      await liff.init({ liffId });
 
-      if (!data.length) {
-        document.getElementById("error").textContent = "ไม่พบข้อมูลการลา";
-        document.getElementById("error").style.display = "block";
+      if (!liff.isLoggedIn()) {
+        liff.login();
         return;
       }
 
-      const headers = Object.keys(data[0]);
-      const tableHead = document.getElementById("tableHead");
-      const headRow = document.createElement("tr");
-      headers.forEach(h => {
-        const th = document.createElement("th");
-        th.textContent = h;
-        headRow.appendChild(th);
-      });
-      tableHead.appendChild(headRow);
-
-      const tableBody = document.getElementById("tableBody");
-      data.forEach(row => {
-        const tr = document.createElement("tr");
-        headers.forEach(h => {
-          const td = document.createElement("td");
-          td.textContent = row[h] ?? "";
-          tr.appendChild(td);
-        });
-        tableBody.appendChild(tr);
-      });
-
-      document.getElementById("leaveTable").style.display = "table";
-    } catch (err) {
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("error").textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
-      document.getElementById("error").style.display = "block";
-    }
-  }
-
-  async function initLiff() {
-    await liff.init({ liffId });
-    if (!liff.isLoggedIn()) {
-      liff.login();
-    } else {
       const profile = await liff.getProfile();
-      fetchLeaveHistory(profile.userId);
+      const lineUserId = profile.userId;
+
+      fetch(scriptUrl + "?lineUserId=" + lineUserId)
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("leave-history");
+          container.innerHTML = "";
+
+          if (data.length === 0) {
+            container.innerHTML = "<p>❌ ไม่พบข้อมูลการลา</p>";
+            return;
+          }
+
+          data.forEach(row => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+              <p><span class="label">ชื่อ-สกุล:</span> ${row["ชื่อ-สกุล"]}</p>
+              <p><span class="label">ประเภทการลา:</span> ${row["ประเภทการลา"]}</p>
+              <p><span class="label">วันที่ลา(เริ่ม):</span> ${formatDate(row["วันที่ลา(เริ่ม)"])}</p>
+              <p><span class="label">เวลา(เริ่ม):</span> ${formatTime(row["เวลา(เริ่ม)"])}</p>
+              <p><span class="label">วันที่ลา(สิ้นสุด):</span> ${formatDate(row["วันที่ลา(สิ้นสุด)"])}</p>
+              <p><span class="label">เวลา(สิ้นสุด):</span> ${formatTime(row["เวลา(สิ้นสุด)"])}</p>
+              <p><span class="label">จำนวนวัน:</span> ${row["จำนวนวัน"]}</p>
+              <p><span class="label">สถานะ:</span> <span class="status ${row["Status"].toLowerCase()}">${row["Status"]}</span></p>
+              <p><span class="label">วันที่ทำรายการ:</span> ${formatDateTime(row["วันที่ทำรายการ"])}</p>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(err => {
+          document.getElementById("leave-history").innerHTML = "⚠️ โหลดข้อมูลล้มเหลว";
+          console.error(err);
+        });
     }
-  }
 
-  initLiff();
-</script>
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("th-TH");
+    }
 
+    function formatTime(timeStr) {
+      if (!timeStr) return "-";
+      const date = new Date(timeStr);
+      return date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function formatDateTime(dateTimeStr) {
+      if (!dateTimeStr) return "-";
+      const date = new Date(dateTimeStr);
+      return date.toLocaleString("th-TH");
+    }
+
+    main();
+  </script>
 </body>
 </html>
