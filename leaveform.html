@@ -233,8 +233,8 @@ async function init() {
   function updateRemainingInfo(){
     let remaining = 0;
     if(leaveType.value==="vacation") remaining = data.vacation;
-    if(leaveType.value==="sick") remaining = data.personal;
-    if(leaveType.value==="personal") remaining = data.sick;
+    if(leaveType.value==="sick") remaining = data.sick;
+    if(leaveType.value==="personal") remaining = data.personal;
     remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
   }
 
