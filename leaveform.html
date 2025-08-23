@@ -314,7 +314,7 @@ async function init() {
 
       if(result.status === "success"){
         alert("ส่งคำขอลาสำเร็จ!");
-        location.reload();
+        location.href = "LeaveHistory.html";
       } else {
         throw new Error("เกิดข้อผิดพลาดในการส่งข้อมูล");
       }
