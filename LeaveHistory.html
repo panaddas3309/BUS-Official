@@ -7,79 +7,105 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
-      font-family: "Tahoma", sans-serif;
+      font-family: "Segoe UI", "Tahoma", sans-serif;
       margin: 0;
       padding: 0;
-      background: #f5f6fa;
+      background: #f0f2f5;
+      color: #333;
     }
     header {
-      background: #4a90e2;
+      background: #2563eb;
       color: white;
       text-align: center;
-      padding: 15px;
-      font-size: 20px;
+      padding: 18px;
+      font-size: 22px;
       font-weight: bold;
-      position: relative;
-    }
-    .back-btn {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      background: white;
-      color: #4a90e2;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .container {
-      padding: 10px;
+      padding: 15px;
+      max-width: 700px;
+      margin: auto;
     }
     .card {
       background: white;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
     }
     .card p {
-      margin: 4px 0;
-      font-size: 14px;
+      margin: 6px 0;
+      font-size: 15px;
+    }
+    .label {
+      font-weight: 600;
+      color: #555;
     }
     .status {
       font-weight: bold;
-      padding: 3px 6px;
+      padding: 4px 10px;
       border-radius: 6px;
       display: inline-block;
+      font-size: 14px;
     }
-    .status.pending { background: #f1c40f; color: white; }
-    .status.approved { background: #27ae60; color: white; }
-    .status.rejected { background: #e74c3c; color: white; }
+    .status.pending { background: #facc15; color: #000; }
+    .status.approved { background: #22c55e; color: white; }
+    .status.rejected { background: #ef4444; color: white; }
+    .back-btn {
+      display: block;
+      width: 100%;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 12px;
+      text-align: center;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .back-btn:hover {
+      background: #1d4ed8;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <button class="back-btn" onclick="window.location.href='dashboard.html'">⬅ กลับ</button>
-    📋 ประวัติการลา
-  </header>
+  <header>📋 ประวัติการลา</header>
   <div class="container" id="leave-data">กำลังโหลดข้อมูล...</div>
+
+  <button class="back-btn" onclick="window.location.href='dashboard.html'">⬅ กลับไป Dashboard</button>
 
 <script>
   const scriptUrl = "https://script.google.com/macros/s/AKfycbyp7k6FlaWz36jn_D1y4l9S-Lo2UEULONr5sQMf81UWQp9AhIGx1L4GV08_p6vNkXQm/exec";
 
-  // ฟังก์ชันแปลงวันที่
-  function formatDate(dateStr) {
-    if (!dateStr) return "-";
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });
-  }
+  const leaveTypeMap = {
+    personal: "ลากิจ",
+    sick: "ลาป่วย",
+    vacation: "ลาพักร้อน"
+  };
 
-  // ฟังก์ชันแปลงเวลา
-  function formatTime(timeStr) {
-    if (!timeStr) return "-";
-    const d = new Date(timeStr);
-    return d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+  // ฟังก์ชันแปลงวันที่เป็นภาษาไทย
+  function formatDateTime(dateStr, includeTime = true) {
+    const date = new Date(dateStr);
+    const months = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear() + 543; // พ.ศ.
+    let formatted = `${day} ${month} ${year}`;
+    if (includeTime) {
+      let h = date.getHours().toString().padStart(2, "0");
+      let m = date.getMinutes().toString().padStart(2, "0");
+      formatted += `, ${h}:${m}`;
+    }
+    return formatted;
   }
 
   liff.init({ liffId: "2007956727-rbZz9a0z" }).then(() => {
@@ -88,35 +114,37 @@
     } else {
       liff.getProfile().then(profile => {
         const lineUserId = profile.userId;
-
         fetch(scriptUrl + "?LineUserID=" + lineUserId)
           .then(res => res.json())
           .then(data => {
             const container = document.getElementById("leave-data");
-            container.innerHTML = "";
-
             if (data.length === 0) {
-              container.innerHTML = "<p class='text-center text-gray-500'>❌ ไม่พบข้อมูลการลา</p>";
-              return;
+              container.innerHTML = "<p style='text-align:center;color:gray;'>❌ ไม่พบข้อมูลการลา</p>";
+            } else {
+              // ✅ เรียงวันที่ทำรายการล่าสุดก่อน
+              data.sort((a, b) => new Date(b["วันที่ทำรายการ"]) - new Date(a["วันที่ทำรายการ"]));
+
+              container.innerHTML = "";
+              data.forEach(item => {
+                const leaveType = leaveTypeMap[item["ประเภทการลา"]] || item["ประเภทการลา"];
+                const startDate = formatDateTime(item["วันที่ลา(เริ่ม)"], true);
+                const endDate = formatDateTime(item["วันที่ลา(สิ้นสุด)"], true);
+                const createdAt = formatDateTime(item["วันที่ทำรายการ"], true);
+                const statusClass = item["Status"].toLowerCase();
+
+                const card = `
+                  <div class="card">
+                    <p><span class="label">ชื่อ-สกุล:</span> ${item["ชื่อ-สกุล"]}</p>
+                    <p><span class="label">ประเภทการลา:</span> ${leaveType}</p>
+                    <p><span class="label">วันที่ลา:</span> ${startDate} ถึง ${endDate}</p>
+                    <p><span class="label">จำนวนวัน:</span> ${item["จำนวนวัน"]}</p>
+                    <p><span class="label">สถานะ:</span> <span class="status ${statusClass}">${item["Status"]}</span></p>
+                    <p><span class="label">วันที่ทำรายการ:</span> ${createdAt}</p>
+                  </div>
+                `;
+                container.innerHTML += card;
+              });
             }
-
-            // ✅ เรียงลำดับตามวันที่ทำรายการ ล่าสุดอยู่บนสุด
-            data.sort((a, b) => new Date(b["วันที่ทำรายการ"]) - new Date(a["วันที่ทำรายการ"]));
-
-            data.forEach(item => {
-              const card = `
-                <div class="card">
-                  <p><strong>ชื่อ-สกุล:</strong> ${item["ชื่อ-สกุล"]}</p>
-                  <p><strong>ประเภทการลา:</strong> ${item["ประเภทการลา"]}</p>
-                  <p><strong>วันที่ลา:</strong> ${formatDate(item["วันที่ลา(เริ่ม)"])} ถึง ${formatDate(item["วันที่ลา(สิ้นสุด)"])}</p>
-                  <p><strong>เวลา:</strong> ${formatTime(item["เวลา(เริ่ม)"])} - ${formatTime(item["เวลา(สิ้นสุด)"])}</p>
-                  <p><strong>จำนวนวัน:</strong> ${item["จำนวนวัน"]}</p>
-                  <p><strong>Status:</strong> <span class="status ${item["Status"]}">${item["Status"]}</span></p>
-                  <p><strong>วันที่ทำรายการ:</strong> ${formatDate(item["วันที่ทำรายการ"])} ${formatTime(item["วันที่ทำรายการ"])}</p>
-                </div>
-              `;
-              container.innerHTML += card;
-            });
           });
       });
     }
