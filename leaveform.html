@@ -278,8 +278,8 @@ function calculateLeaveDays(sDate, sTime, eDate, eTime){
 
     let remaining = 0;
     if(leaveTypeValue==="vacation") remaining = data.vacation;
-    if(leaveTypeValue==="sick") remaining = data.personal;
-    if(leaveTypeValue==="personal") remaining = data.sick;
+    if(leaveTypeValue==="sick") remaining = data.sick;
+    if(leaveTypeValue==="personal") remaining = data.personal;
 
     if(days>remaining){
       alertBox.style.display="block";
