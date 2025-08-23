@@ -147,7 +147,6 @@ textarea { min-height: 80px; resize: vertical; }
     <option value="vacation">ลาพักร้อน</option>
     <option value="sick">ลาป่วย</option>
     <option value="personal">ลากิจ</option>
-    
   </select>
   <div class="info-remaining" id="remainingInfo"></div>
 </div>
@@ -213,49 +212,59 @@ async function init() {
   const remainingInfo = document.getElementById("remainingInfo");
 
   function updateRemainingInfo(){
-let remaining = 0;
-if (leaveTypeValue === "vacation") remaining = data.vacation;
-if (leaveTypeValue === "sick") remaining = data.sick;
-if (leaveTypeValue === "personal") remaining = data.personal;
-  remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
+    let remaining = 0;
+    if(leaveType.value==="vacation") remaining = data.vacation;
+    if(leaveType.value==="sick") remaining = data.sick;
+    if(leaveType.value==="personal") remaining = data.personal;
+    remainingInfo.textContent = `สิทธิ์คงเหลือ: ${remaining} วัน`;
   }
 
   leaveType.addEventListener("change", updateRemainingInfo);
   updateRemainingInfo();
 
-function calculateLeaveDays(sDate, sTime, eDate, eTime){
-  if(!sDate || !sTime || !eDate || !eTime) return 0;
+  function calculateLeaveDays(sDate,sTime,eDate,eTime){
+    if(!sDate || !sTime || !eDate || !eTime) return 0;
+    const WORK_HOURS_PER_DAY = 8;
+    const start = new Date(`${sDate}T${sTime}`);
+    const end = new Date(`${eDate}T${eTime}`);
+    if(end <= start) return 0;
 
-  const WORK_HOURS_PER_DAY = 8;
-  const start = new Date(`${sDate}T${sTime}`);
-  const end = new Date(`${eDate}T${eTime}`);
-  if(end <= start) return 0;
-
-  let totalHours = 0;
-  let current = new Date(start);
-  current.setHours(0,0,0,0);
-
-  while(current <= end){
-    const dayOfWeek = current.getDay();
-    if(dayOfWeek !== 0){ // skip Sunday
-      const morningStart = new Date(current); morningStart.setHours(8,0,0,0);
-      const morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
-      const afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
-      const afternoonEnd = new Date(current); afternoonEnd.setHours(17,0,0,0);
-
-      // คำนวณชั่วโมงเช้า
-      let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 3600;
-      // คำนวณชั่วโมงบ่าย
-      let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 3600;
-
-      totalHours += overlapMorning + overlapAfternoon;
-    }
-    current.setDate(current.getDate()+1);
+    let totalHours = 0;
+    let current = new Date(start);
     current.setHours(0,0,0,0);
-  }
 
-  return Math.round((totalHours/WORK_HOURS_PER_DAY)*10)/10; // ปัดทศนิยม 0.1 วัน
-}
+    while(current <= end){
+      if(current.getDay()!==0){
+        let dayStart = new Date(current); dayStart.setHours(8,0,0,0);
+        let dayEnd = new Date(current); dayEnd.setHours(17,0,0,0);
+        let currentStart = (current > dayStart) ? current : dayStart;
+        let currentEnd = (end < dayEnd) ? end : dayEnd;
+
+        let morningStart = new Date(current); morningStart.setHours(8,0,0,0);
+        let morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
+        let morningHours = 0;
+        if(currentStart < morningEnd && currentEnd > morningStart){
+          let overlapStart = (currentStart>morningStart)?currentStart:morningStart;
+          let overlapEnd = (currentEnd<morningEnd)?currentEnd:morningEnd;
+          morningHours = (overlapEnd-overlapStart)/1000/3600;
+        }
+
+        let afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
+        let afternoonEnd = new Date(current); afternoonEnd.setHours(17,0,0,0);
+        let afternoonHours = 0;
+        if(currentStart < afternoonEnd && currentEnd > afternoonStart){
+          let overlapStart = (currentStart>afternoonStart)?currentStart:afternoonStart;
+          let overlapEnd = (currentEnd<afternoonEnd)?currentEnd:afternoonEnd;
+          afternoonHours = (overlapEnd-overlapStart)/1000/3600;
+        }
+
+        totalHours += morningHours+afternoonHours;
+      }
+      current.setDate(current.getDate()+1);
+      current.setHours(0,0,0,0);
+    }
+    return Math.round((totalHours/WORK_HOURS_PER_DAY)*10)/10;
+  }
 
   [startDate,startTime,endDate,endTime].forEach(el=>{
     el.addEventListener("change",()=>{
@@ -277,9 +286,9 @@ function calculateLeaveDays(sDate, sTime, eDate, eTime){
     }
 
     let remaining = 0;
-    if (leaveTypeValue === "vacation") remaining = data.vacation;
-    if (leaveTypeValue === "sick") remaining = data.sick;
-    if (leaveTypeValue === "personal") remaining = data.personal;
+    if(leaveTypeValue==="vacation") remaining = data.vacation;
+    if(leaveTypeValue==="sick") remaining = data.sick;
+    if(leaveTypeValue==="personal") remaining = data.personal;
 
     if(days>remaining){
       alertBox.style.display="block";
