@@ -338,13 +338,30 @@ async function init() {
       to: `${endDate.value} ${endTime.value}`,
       days: days
     };
-
-    console.log("ส่งคำขอลา:", leaveRequest);
-    alert("ส่งคำขอลาสำเร็จ!");
-  });
-}
-
-init();
-</script>
+        // 🔗 ส่งไปบันทึกที่ Google Sheet
+        fetch('https://script.google.com/macros/s/AKfycbzbLvUz47iOMvSASzET_gTWqsAmEcW7hMAMPNIFjvvTKqOdzVn49Nz3sjSHv5ZcHIEM/exec', {
+          method: "POST",
+          body: JSON.stringify(leaveRequest),
+          headers: {"Content-Type": "application/json"}
+        })
+        .then(res => res.json())
+        .then(response => {
+          if(response.status==="success"){
+            alert("ส่งคำขอลาสำเร็จ และบันทึกเรียบร้อย!");
+          } else {
+            alert("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
+            submitBtn.disabled=false;
+          }
+        })
+        .catch(err=>{
+          console.error(err);
+          alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+          submitBtn.disabled=false;
+        });
+      });
+    }
+    
+    init();
+    </script>
 </body>
 </html>
