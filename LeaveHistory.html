@@ -7,7 +7,7 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
-      font-family: "Segoe UI", "Tahoma", sans-serif;
+      font-family: "Helvetica", "Arial", sans-serif;
       margin: 0;
       padding: 0;
       background: #f0f2f5;
@@ -21,6 +21,20 @@
       font-size: 22px;
       font-weight: bold;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .back-btn-top {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      color: #2563eb;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
     }
     .container {
       padding: 15px;
@@ -60,7 +74,7 @@
       display: block;
       width: 100%;
       max-width: 700px;
-      margin: 20px auto;
+      margin: 15px auto 30px auto;
       padding: 12px;
       text-align: center;
       background: #2563eb;
@@ -78,7 +92,11 @@
   </style>
 </head>
 <body>
-  <header>📋 ประวัติการลา</header>
+  <header>
+    📋 ประวัติการลา
+    <button class="back-btn-top" onclick="window.location.href='dashboard.html'">⬅ Dashboard</button>
+  </header>
+
   <div class="container" id="leave-data">กำลังโหลดข้อมูล...</div>
 
   <button class="back-btn" onclick="window.location.href='dashboard.html'">⬅ กลับไป Dashboard</button>
@@ -92,20 +110,22 @@
     vacation: "ลาพักร้อน"
   };
 
-  // ฟังก์ชันแปลงวันที่เป็นภาษาไทย
   function formatDateTime(dateStr, includeTime = true) {
     const date = new Date(dateStr);
     const months = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
     const day = date.getDate();
     const month = months[date.getMonth()];
     const year = date.getFullYear() + 543; // พ.ศ.
-    let formatted = `${day} ${month} ${year}`;
-    if (includeTime) {
-      let h = date.getHours().toString().padStart(2, "0");
-      let m = date.getMinutes().toString().padStart(2, "0");
-      formatted += `, ${h}:${m}`;
-    }
-    return formatted;
+    
+    if (!includeTime) return `${day} ${month} ${year}`;
+
+    let h = date.getHours().toString().padStart(2, "0");
+    let m = date.getMinutes().toString().padStart(2, "0");
+
+    // ถ้าเวลาเป็น 00:00 ให้คืนเฉพาะวันที่
+    if (h === "00" && m === "00") return `${day} ${month} ${year}`;
+
+    return `${day} ${month} ${year}, ${h}:${m}`;
   }
 
   liff.init({ liffId: "2007956727-rbZz9a0z" }).then(() => {
@@ -121,15 +141,15 @@
             if (data.length === 0) {
               container.innerHTML = "<p style='text-align:center;color:gray;'>❌ ไม่พบข้อมูลการลา</p>";
             } else {
-              // ✅ เรียงวันที่ทำรายการล่าสุดก่อน
+              // เรียงวันที่ทำรายการล่าสุดก่อน
               data.sort((a, b) => new Date(b["วันที่ทำรายการ"]) - new Date(a["วันที่ทำรายการ"]));
 
               container.innerHTML = "";
               data.forEach(item => {
                 const leaveType = leaveTypeMap[item["ประเภทการลา"]] || item["ประเภทการลา"];
-                const startDate = formatDateTime(item["วันที่ลา(เริ่ม)"], true);
-                const endDate = formatDateTime(item["วันที่ลา(สิ้นสุด)"], true);
-                const createdAt = formatDateTime(item["วันที่ทำรายการ"], true);
+                const startDate = formatDateTime(item["วันที่ลา(เริ่ม)"]);
+                const endDate = formatDateTime(item["วันที่ลา(สิ้นสุด)"]);
+                const createdAt = formatDateTime(item["วันที่ทำรายการ"]);
                 const statusClass = item["Status"].toLowerCase();
 
                 const card = `
