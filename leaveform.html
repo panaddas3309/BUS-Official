@@ -194,6 +194,9 @@ async function init() {
 
   const res = await fetch(`${SCRIPT_URL_GET}?lineUserId=${userId}`);
   const data = await res.json();
+  
+  // เก็บ lineUserId ลงใน data เพื่อใช้ตอนส่ง POST
+  data.lineUserId = userId; 
 
   document.getElementById("employeeName").value = data.name;
   document.getElementById("employeeId").value = data.employeeId;
