@@ -64,8 +64,8 @@
   <!-- โหลด LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    const scriptUrl = "YOUR_SCRIPT_URL_HERE"; // ใส่ WebApp URL ของ Google Script
-    const liffId = "YOUR_LIFF_ID_HERE";       // ใส่ LIFF ID ของคุณ
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbwzVNwYMXE8bJnuNnwUCBJEaYDHDKBamf-2prPjgDjiIdE0GrkZUix3F3_fX4KTwNcf/exec"; // URL ของ Google Apps Script
+    const liffId = "2007956727-rbZz9a0z"; // ใส่ LIFF ID ของคุณ
 
     async function fetchLeaveHistory(lineUserId) {
       try {
@@ -117,7 +117,7 @@
         liff.login();
       } else {
         const profile = await liff.getProfile();
-        const lineUserId = profile.userId; // << ได้ userId จริง
+        const lineUserId = profile.userId; // ได้ userId จริง
         fetchLeaveHistory(lineUserId);
       }
     }
