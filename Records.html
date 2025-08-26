@@ -1,170 +1,220 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบสิทธิ์การลา</title>
-  <style>
-    body {
-      font-family: "Prompt", sans-serif;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-    #loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-    }
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #4CAF50;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 10px;
-    }
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
-    .dashboard {
-      padding: 20px;
-      max-width: 500px;
-      margin: auto;
-    }
-    .profile {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .profile-pic {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 3px solid #4CAF50;
-    }
-    .greeting {
-      font-size: 20px;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    .greeting-sub {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-    .card {
-      background: white;
-      border-radius: 15px;
-      padding: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .card h3 {
-      margin-top: 0;
-      font-size: 18px;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 8px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    table th, table td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-    }
-    table th {
-      background: #f9f9f9;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตรวจสอบสิทธิ์การลา</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Prompt', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #9face6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .dashboard {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    padding: 20px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    animation: fadeIn 0.6s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(8px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  .profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #4CAF50;
+    margin-bottom: 10px;
+  }
+  .greeting {
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  .greeting-sub {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+  }
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+  }
+  .info-table th, .info-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    width: 50%;
+    text-align: center;
+  }
+  .info-table th {
+    font-weight: normal;
+    background: #f1f1f1;
+    text-align: right;
+    padding-right: 10px;
+  }
+  .tab-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+    gap: 10px;
+  }
+  .tab-button {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.3s;
+  }
+  .tab-active {
+    background-color: #fff;
+    color: #007bff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .tab-inactive {
+    background-color: #eee;
+    color: #888;
+  }
+  .leave-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  }
+  .leave-card span.emoji { font-size: 20px; margin-right: 8px; }
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4CAF50;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: spin 1s linear infinite;
+    margin: 50px auto;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+  #loading-text { font-size: 16px; color: #555; text-align: center; margin-top: 10px;}
+</style>
 </head>
 <body>
-  <!-- Loader -->
-  <div id="loading">
-    <div class="loader"></div>
-    <div id="loading-text">⏳ กำลังโหลดข้อมูล...</div>
-  </div>
 
-  <!-- Dashboard -->
-  <div class="dashboard" id="dashboard" style="display:none;"></div>
+<div id="loading">
+  <div class="loader"></div>
+  <div id="loading-text">⏳ กำลังโหลดข้อมูล...</div>
+</div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const LIFF_ID = "2007956727-rbZz9a0z"; // <<== ใส่ LIFF ID
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVP5tUUXDE6faaIl8GzsKKS2qS3BL5gd-PFNo9ts_t7CIi5xM4ekhjkIbscRYEJFaT/exec";
+<div class="dashboard" id="dashboard" style="display:none;"></div>
 
-    const greetings = [
-      "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!",
-      "วันนี้ก็ทำได้ดีแน่นอนครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!", "ขอให้มีความสุขกับการทำงาน!"
-    ];
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+const LIFF_ID = "2007956727-rbZz9a0z"; // ใส่ LIFF ID ของคุณ
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxu4y_3K_4-X_PWckRF77PP-jOHHL8eZTVMyVSWtufO00O67iTyyXrkJa9nEm0bqJUv/exec";
 
-    async function init() {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) liff.login();
+const greetings = [
+  "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
+  "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
+  "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
+  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
+  "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
+  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
+];
 
-      const profile = await liff.getProfile();
-      const userId = profile.userId;
+async function init() {
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) liff.login();
 
-      let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
-      let data = await res.json();
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
 
-      const dashboard = document.getElementById("dashboard");
-      const loader = document.getElementById("loading");
-      const greet = greetings[Math.floor(Math.random() * greetings.length)];
+  const dashboard = document.getElementById("dashboard");
+  const loader = document.getElementById("loading");
 
-      loader.style.display = "none";
-      dashboard.style.display = "block";
+  let res = await fetch(`${SCRIPT_URL}?lineUserId=${userId}`);
+  let data = await res.json();
 
-      if (data.bound) {
-        dashboard.innerHTML = `
-          <div class="profile">
-            <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-            <div class="greeting">สวัสดีคุณ ${data.name}</div>
-            <div class="greeting-sub">${greet}</div>
-          </div>
+  const greet = greetings[Math.floor(Math.random()*greetings.length)];
 
-          <!-- Card สิทธิ์ลาคงเหลือ -->
-          <div class="card">
-            <h3>📌 สิทธิ์ลาคงเหลือ</h3>
-            <table>
-              <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
-              <tr><th>ลาพักร้อน (AL)</th><td>${data.vacation}</td></tr>
-              <tr><th>ลาป่วย (SL)</th><td>${data.sick}</td></tr>
-              <tr><th>ลากิจ (BL)</th><td>${data.personal}</td></tr>
-              <tr><th>ขาดงาน (A)</th><td>${data.absent}</td></tr>
-            </table>
-          </div>
+  loader.style.display = "none";
+  dashboard.style.display = "block";
 
-          <!-- Card ประวัติการลา -->
-          <div class="card">
-            <h3>📖 ประวัติการลา</h3>
-            <table>
-              <tr><th>รหัสพนักงาน</th><td>${data.employeeId}</td></tr>
-              <tr><th>ชื่อ - สกุล</th><td>${data.name}</td></tr>
-              <tr><th>พักร้อน (AL)</th><td>${data.recordAL}</td></tr>
-              <tr><th>ป่วย (SL)</th><td>${data.recordSL}</td></tr>
-              <tr><th>กิจ (BL)</th><td>${data.recordBL}</td></tr>
-              <tr><th>ขาดงาน (A)</th><td>${data.recordA}</td></tr>
-            </table>
-          </div>
-        `;
-      } else {
-        dashboard.innerHTML = `
-          <div class="profile">
-            <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
-            <div class="greeting">คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
-          </div>
-        `;
-      }
-    }
+  if (data.bound) {
+    // สร้าง HTML Dashboard
+    dashboard.innerHTML = `
+      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+      <div class="greeting">สวัสดีคุณ ${data.name}</div>
+      <div class="greeting-sub">${greet}</div>
 
-    init();
-  </script>
+      <div class="tab-buttons">
+        <button class="tab-button tab-active" id="tabRemainBtn" onclick="showTab('remain')">สิทธิ์ลาคงเหลือ</button>
+        <button class="tab-button tab-inactive" id="tabUsedBtn" onclick="showTab('used')">สิทธิ์ลาที่ใช้</button>
+      </div>
+
+      <div id="remain" class="leave-content">
+        <div class="leave-card"><div><span class="emoji">🌴</span>ลาพักร้อน</div><div>${data.vacation} วัน</div></div>
+        <div class="leave-card"><div><span class="emoji">📄</span>ลากิจ</div><div>${data.sick} วัน</div></div>
+        <div class="leave-card"><div><span class="emoji">🤒</span>ลาป่วย</div><div>${data.personal} วัน</div></div>
+        <div class="leave-card"><div><span class="emoji">❌</span>ขาดงาน</div><div>${data.absent} วัน</div></div>
+      </div>
+
+      <div id="used" class="leave-content" style="display:none;">
+        <div class="leave-card"><div><span class="emoji">🌴</span>ลาพักร้อน</div><div>${data.records.vacation} วัน</div></div>
+        <div class="leave-card"><div><span class="emoji">📄</span>ลากิจ</div><div>${data.records.sick} วัน</div></div>
+        <div class="leave-card"><div><span class="emoji">🤒</span>ลาป่วย</div><div>${data.records.personal} วัน</div></div>
+        <div class="leave-card"><div><span class="emoji">❌</span>ขาดงาน</div><div>${data.records.absent} วัน</div></div>
+      </div>
+    `;
+  } else {
+    dashboard.innerHTML = `
+      <img src="${profile.pictureUrl}" class="profile-pic" alt="Profile">
+      <div class="greeting">สวัสดีคุณ ${profile.displayName} - คุณยังไม่ได้ผูกบัญชีพนักงาน</div>
+      <button class="btn btn-leave" onclick="location.href='bind.html'">ไปผูกบัญชี</button>
+    `;
+  }
+}
+
+// Toggle Tabs
+function showTab(tab) {
+  const remain = document.getElementById("remain");
+  const used = document.getElementById("used");
+  const remainBtn = document.getElementById("tabRemainBtn");
+  const usedBtn = document.getElementById("tabUsedBtn");
+
+  if(tab==="remain"){
+    remain.style.display = "block";
+    used.style.display = "none";
+    remainBtn.classList.add("tab-active");
+    remainBtn.classList.remove("tab-inactive");
+    usedBtn.classList.add("tab-inactive");
+    usedBtn.classList.remove("tab-active");
+  } else {
+    remain.style.display = "none";
+    used.style.display = "block";
+    usedBtn.classList.add("tab-active");
+    usedBtn.classList.remove("tab-inactive");
+    remainBtn.classList.add("tab-inactive");
+    remainBtn.classList.remove("tab-active");
+  }
+}
+
+init();
+</script>
 </body>
 </html>
