@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบตรวจสอบสิทธิ์การลา</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #f0f9ff, #e0f2fe);
+      font-family: "Prompt", sans-serif;
+    }
+    .active-tab {
+      background-color: #0ea5e9;
+      color: white;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6">
+
+  <!-- Header -->
+  <div class="w-full max-w-4xl text-center mb-6">
+    <h1 class="text-2xl font-bold text-sky-700">🌿 ระบบตรวจสอบสิทธิ์การลา</h1>
+    <p class="text-gray-600 mt-2">“พักผ่อนบ้าง เพื่อพลังในการทำงานวันพรุ่งนี้ ✨”</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex space-x-4 mb-6">
+    <button id="btn-balance" onclick="loadPage('balance')" class="px-4 py-2 rounded-lg shadow-md bg-white hover:bg-sky-100">สิทธิ์ลาคงเหลือ</button>
+    <button id="btn-records" onclick="loadPage('records')" class="px-4 py-2 rounded-lg shadow-md bg-white hover:bg-sky-100">ประวัติการลา</button>
+  </div>
+
+  <!-- Content -->
+  <div id="content" class="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6">
+    <p class="text-center text-gray-500">กำลังโหลดข้อมูล...</p>
+  </div>
+
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbzVP5tUUXDE6faaIl8GzsKKS2qS3BL5gd-PFNo9ts_t7CIi5xM4ekhjkIbscRYEJFaT/exec";
+
+    async function loadPage(page) {
+      // สลับสีปุ่มแท็บ
+      document.getElementById("btn-balance").classList.remove("active-tab");
+      document.getElementById("btn-records").classList.remove("active-tab");
+      document.getElementById(`btn-${page}`).classList.add("active-tab");
+
+      document.getElementById("content").innerHTML = "<p class='text-center text-gray-500'>⏳ กำลังโหลดข้อมูล...</p>";
+
+      try {
+        const res = await fetch(`${apiUrl}?page=${page}`);
+        const data = await res.json();
+
+        let html = "<div class='overflow-x-auto'><table class='w-full border border-gray-300 rounded-lg'>";
+        
+        if (page === "balance") {
+          html += "<thead class='bg-sky-100 text-sky-700'><tr><th class='p-2'>รหัสพนักงาน</th><th class='p-2'>ชื่อ</th><th class='p-2'>พักร้อน</th><th class='p-2'>ลากิจ</th><th class='p-2'>ลาป่วย</th><th class='p-2'>ขาดงาน</th></tr></thead><tbody>";
+          data.forEach(r => {
+            html += `<tr class='border-b hover:bg-sky-50'>
+              <td class='p-2 text-center'>${r.empId}</td>
+              <td class='p-2'>${r.name}</td>
+              <td class='p-2 text-center'>${r.vacation}</td>
+              <td class='p-2 text-center'>${r.personal}</td>
+              <td class='p-2 text-center'>${r.sick}</td>
+              <td class='p-2 text-center'>${r.absent}</td>
+            </tr>`;
+          });
+        } else if (page === "records") {
+          html += "<thead class='bg-sky-100 text-sky-700'><tr><th class='p-2'>รหัสพนักงาน</th><th class='p-2'>ชื่อ</th><th class='p-2'>พักร้อนใช้ไป</th><th class='p-2'>ลากิจใช้ไป</th><th class='p-2'>ลาป่วยใช้ไป</th><th class='p-2'>ขาดงานใช้ไป</th></tr></thead><tbody>";
+          data.forEach(r => {
+            html += `<tr class='border-b hover:bg-sky-50'>
+              <td class='p-2 text-center'>${r.empId}</td>
+              <td class='p-2'>${r.name}</td>
+              <td class='p-2 text-center'>${r.vacationUsed}</td>
+              <td class='p-2 text-center'>${r.personalUsed}</td>
+              <td class='p-2 text-center'>${r.sickUsed}</td>
+              <td class='p-2 text-center'>${r.absentUsed}</td>
+            </tr>`;
+          });
+        }
+
+        html += "</tbody></table></div>";
+        document.getElementById("content").innerHTML = html;
+
+      } catch (err) {
+        document.getElementById("content").innerHTML = "<p class='text-center text-red-500'>❌ โหลดข้อมูลไม่สำเร็จ</p>";
+      }
+    }
+
+    // โหลดหน้า balance เป็นค่าเริ่มต้น
+    loadPage("balance");
+  </script>
+</body>
+</html>
