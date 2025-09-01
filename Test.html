@@ -1,26 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<meta charset="UTF-8">
+<title>ทดสอบปริ้นข้อความลง PDF</title>
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<style>
+  body { font-family: Arial; padding: 20px; }
+  label, input, button { display: block; margin-bottom: 10px; }
+  input { padding: 5px; width: 300px; }
+  button { padding: 8px 15px; cursor: pointer; }
+</style>
 </head>
 <body>
-<button id="test">ลองวางข้อความ</button>
-<script>
-document.getElementById("test").addEventListener("click", async ()=>{
-  const url = "https://raw.githubusercontent.com/your-username/your-repo/main/ใบลา.pdf"; // เปลี่ยนเป็น URL PDF ของคุณ
-  const existingPdfBytes = await fetch(url).then(res=>res.arrayBuffer());
+<h2>กรอกข้อความลงใน PDF</h2>
 
-  const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+<label for="nameInput">ชื่อ-สกุล:</label>
+<input type="text" id="nameInput" placeholder="กรอกชื่อ-สกุล">
+
+<button id="printBtn">🖨 ปริ้น PDF</button>
+
+<script>
+document.getElementById("printBtn").addEventListener("click", async () => {
+  const name = document.getElementById("nameInput").value || "ไม่มีชื่อ";
+
+  // โหลด PDF Template จาก GitHub (เปลี่ยน URL ให้ตรงกับไฟล์ของคุณ)
+  const url = "https://raw.githubusercontent.com/your-username/your-repo/main/ใบลา.pdf";
+  const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer());
+
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const pdfDoc = await PDFDocument.load(existingPdfBytes);
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
 
-  // วางข้อความทดสอบ
-  firstPage.drawText("TEST", { x: 50, y: 700, size: 14 }); // ปรับ x,y จนพอดี
+  // วางข้อความลง PDF
+  // x และ y คือพิกัดบน PDF (0,0 = มุมซ้ายล่าง)
+  firstPage.drawText(`ชื่อ-สกุล: ${name}`, { x: 100, y: 700, size: 14, font: await pdfDoc.embedFont(StandardFonts.Helvetica), color: rgb(0,0,0) });
 
+  // สร้าง PDF ใหม่
   const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
   const blobUrl = URL.createObjectURL(blob);
-  window.open(blobUrl);
+
+  // เปิดแท็บใหม่ให้ปริ้น
+  const newTab = window.open(blobUrl, "_blank");
+  newTab.focus();
 });
 </script>
 </body>
