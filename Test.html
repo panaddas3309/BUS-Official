@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+<button id="test">ลองวางข้อความ</button>
+<script>
+document.getElementById("test").addEventListener("click", async ()=>{
+  const url = "https://raw.githubusercontent.com/your-username/your-repo/main/ใบลา.pdf"; // เปลี่ยนเป็น URL PDF ของคุณ
+  const existingPdfBytes = await fetch(url).then(res=>res.arrayBuffer());
+
+  const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+
+  // วางข้อความทดสอบ
+  firstPage.drawText("TEST", { x: 50, y: 700, size: 14 }); // ปรับ x,y จนพอดี
+
+  const pdfBytes = await pdfDoc.save();
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const blobUrl = URL.createObjectURL(blob);
+  window.open(blobUrl);
+});
+</script>
+</body>
+</html>
