@@ -2,21 +2,38 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ทดสอบปริ้น PDF</title>
+<title>กรอกข้อมูลใบลา</title>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <style>
-  body { font-family: Arial; padding: 20px; }
-  label, input, button { display: block; margin-bottom: 10px; }
-  input { padding: 5px; width: 300px; }
-  button { padding: 8px 15px; cursor: pointer; margin-bottom: 20px; }
-  iframe { width: 100%; height: 500px; border: 1px solid #ccc; }
+body { font-family: Arial; padding: 20px; }
+label, input, select, button { display: block; margin-bottom: 10px; }
+input, select { padding: 5px; width: 300px; }
+button { padding: 8px 15px; cursor: pointer; margin-bottom: 20px; }
+iframe { width: 100%; height: 500px; border: 1px solid #ccc; }
 </style>
 </head>
 <body>
-<h2>กรอกข้อความลงใน PDF</h2>
+
+<h2>กรอกข้อมูลใบลา</h2>
 
 <label for="nameInput">ชื่อ-สกุล:</label>
 <input type="text" id="nameInput" placeholder="กรอกชื่อ-สกุล">
+
+<label for="typeSelect">ประเภทการลา:</label>
+<select id="typeSelect">
+  <option value="ลากิจ">ลากิจ</option>
+  <option value="ลาป่วย">ลาป่วย</option>
+  <option value="ลาพักร้อน">ลาพักร้อน</option>
+</select>
+
+<label for="startDate">วันที่เริ่มลา:</label>
+<input type="date" id="startDate">
+
+<label for="endDate">วันที่สิ้นสุดลา:</label>
+<input type="date" id="endDate">
+
+<label for="daysInput">จำนวนวัน:</label>
+<input type="number" id="daysInput" min="0" placeholder="จำนวนวันลา">
 
 <button id="previewBtn">🔍 แสดงตัวอย่าง PDF</button>
 <button id="printBtn">🖨 ปริ้น PDF</button>
@@ -24,43 +41,65 @@
 <iframe id="pdfPreview"></iframe>
 
 <script>
-const pdfUrl = "https://raw.githubusercontent.com/USERNAME/REPO_NAME/main/ใบลา.pdf"; // เปลี่ยน URL ให้ตรงกับไฟล์ของคุณ
+const pdfUrl = "https://panaddas3309.github.io/BUS-Official/ใบลา.pdf";
 
-async function generatePdf(name) {
+async function generatePdf(data) {
   const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
   const { PDFDocument, StandardFonts, rgb } = PDFLib;
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   // วางข้อความลง PDF
-  firstPage.drawText(`ชื่อ-สกุล: ${name}`, {
-    x: 100, y: 700, size: 14,
-    font: await pdfDoc.embedFont(StandardFonts.Helvetica),
-    color: rgb(0,0,0)
-  });
+  firstPage.drawText(`ชื่อ-สกุล: ${data.name}`, { x: 100, y: 700, size: 14, font, color: rgb(0,0,0) });
+  firstPage.drawText(`ประเภทการลา: ${data.type}`, { x: 100, y: 680, size: 14, font, color: rgb(0,0,0) });
+  firstPage.drawText(`วันที่เริ่ม: ${data.start}`, { x: 100, y: 660, size: 14, font, color: rgb(0,0,0) });
+  firstPage.drawText(`วันที่สิ้นสุด: ${data.end}`, { x: 100, y: 640, size: 14, font, color: rgb(0,0,0) });
+  firstPage.drawText(`จำนวนวัน: ${data.days}`, { x: 100, y: 620, size: 14, font, color: rgb(0,0,0) });
 
   return pdfDoc.save();
 }
 
+// แปลงวันที่เป็นรูปแบบ dd/mm/yyyy
+function formatDate(dateStr){
+  if(!dateStr) return "-";
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2,'0');
+  const month = String(d.getMonth()+1).padStart(2,'0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 // ปุ่มแสดงตัวอย่าง
 document.getElementById("previewBtn").addEventListener("click", async () => {
-  const name = document.getElementById("nameInput").value || "ไม่มีชื่อ";
-  const pdfBytes = await generatePdf(name);
+  const data = {
+    name: document.getElementById("nameInput").value || "-",
+    type: document.getElementById("typeSelect").value,
+    start: formatDate(document.getElementById("startDate").value),
+    end: formatDate(document.getElementById("endDate").value),
+    days: document.getElementById("daysInput").value || "-"
+  };
+  const pdfBytes = await generatePdf(data);
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const blobUrl = URL.createObjectURL(blob);
-  document.getElementById("pdfPreview").src = blobUrl;
+  document.getElementById("pdfPreview").src = URL.createObjectURL(blob);
 });
 
 // ปุ่มปริ้น
 document.getElementById("printBtn").addEventListener("click", async () => {
-  const name = document.getElementById("nameInput").value || "ไม่มีชื่อ";
-  const pdfBytes = await generatePdf(name);
+  const data = {
+    name: document.getElementById("nameInput").value || "-",
+    type: document.getElementById("typeSelect").value,
+    start: formatDate(document.getElementById("startDate").value),
+    end: formatDate(document.getElementById("endDate").value),
+    days: document.getElementById("daysInput").value || "-"
+  };
+  const pdfBytes = await generatePdf(data);
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
   const blobUrl = URL.createObjectURL(blob);
-  const newTab = window.open(blobUrl, "_blank");
-  newTab.focus();
+  window.open(blobUrl, "_blank");
 });
 </script>
+
 </body>
 </html>
