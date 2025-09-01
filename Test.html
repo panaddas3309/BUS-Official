@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ทดสอบพิกัด PDF</title>
+<title>ทดสอบพิกัด PDF ภาษาไทย</title>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <style>
 body { font-family: Arial; padding: 20px; }
@@ -13,7 +13,7 @@ iframe { width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 15px; }
 </head>
 <body>
 
-<h2>ทดสอบวางข้อความลง PDF</h2>
+<h2>ทดสอบวางข้อความลง PDF (ภาษาไทย)</h2>
 
 <label>ข้อความ:</label>
 <input type="text" id="textInput" placeholder="พิมพ์ข้อความที่นี่">
@@ -31,22 +31,32 @@ iframe { width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 15px; }
 
 <script>
 const pdfUrl = "https://panaddas3309.github.io/BUS-Official/ใบลา.pdf";
+const fontUrl = "AngsanaNew.ttf"; // 👉 ต้องมีไฟล์นี้ในโฟลเดอร์เดียวกัน
 
 async function generatePdf(text, x, y) {
   const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
-  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+
+  const { PDFDocument, rgb } = PDFLib;
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const customFont = await pdfDoc.embedFont(fontBytes);
+
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  firstPage.drawText(text, { x: parseInt(x), y: parseInt(y), size: 16, font, color: rgb(1,0,0) });
+  firstPage.drawText(text, { 
+    x: parseInt(x), 
+    y: parseInt(y), 
+    size: 14,          // ขนาดฟอนต์ 14
+    font: customFont,  // ใช้ฟอนต์ไทย
+    color: rgb(0,0,0)  // สีดำ
+  });
 
   return pdfDoc.save();
 }
 
 document.getElementById("previewBtn").addEventListener("click", async () => {
-  const text = document.getElementById("textInput").value || "ทดสอบข้อความ";
+  const text = document.getElementById("textInput").value || "ทดสอบข้อความภาษาไทย";
   const x = document.getElementById("xInput").value;
   const y = document.getElementById("yInput").value;
 
@@ -56,14 +66,18 @@ document.getElementById("previewBtn").addEventListener("click", async () => {
 });
 
 document.getElementById("printBtn").addEventListener("click", async () => {
-  const text = document.getElementById("textInput").value || "ทดสอบข้อความ";
+  const text = document.getElementById("textInput").value || "ทดสอบข้อความภาษาไทย";
   const x = document.getElementById("xInput").value;
   const y = document.getElementById("yInput").value;
 
   const pdfBytes = await generatePdf(text, x, y);
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
   const blobUrl = URL.createObjectURL(blob);
-  window.open(blobUrl, "_blank");
+  const printWindow = window.open(blobUrl, "_blank");
+  printWindow.onload = () => {
+    printWindow.focus();
+    printWindow.print();
+  };
 });
 </script>
 
