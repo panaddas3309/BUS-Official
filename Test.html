@@ -31,7 +31,8 @@ iframe { width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 15px; }
 
 <script>
 const pdfUrl = "https://panaddas3309.github.io/BUS-Official/ใบลา.pdf";
-const fontUrl = "AngsanaNew.ttf"; // 👉 ต้องมีไฟล์นี้ในโฟลเดอร์เดียวกัน
+// ✅ ใช้ฟอนต์จาก Google Fonts (Noto Sans Thai)
+const fontUrl = "https://github.com/google/fonts/raw/main/ofl/notosansthai/NotoSansThai-Regular.ttf";
 
 async function generatePdf(text, x, y) {
   const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
@@ -47,9 +48,9 @@ async function generatePdf(text, x, y) {
   firstPage.drawText(text, { 
     x: parseInt(x), 
     y: parseInt(y), 
-    size: 14,          // ขนาดฟอนต์ 14
-    font: customFont,  // ใช้ฟอนต์ไทย
-    color: rgb(0,0,0)  // สีดำ
+    size: 14,
+    font: customFont,
+    color: rgb(0,0,0)
   });
 
   return pdfDoc.save();
