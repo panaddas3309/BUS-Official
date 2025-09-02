@@ -2,46 +2,58 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>ฟอร์มตัวอย่าง</title>
+<title>ฟอร์มลา</title>
 <style>
   body { font-family: Arial; padding: 20px; }
-  .form-preview { border: 1px solid #ccc; padding: 20px; width: 500px; margin-top: 20px; }
-  .form-field { margin-bottom: 10px; }
-  label { display: block; margin-bottom: 5px; }
-  input { padding: 5px; width: 100%; }
+  label { display: block; margin-top: 10px; }
+  input[type="text"] { width: 300px; padding: 5px; }
+  .checkbox { width: 20px; height: 20px; text-align: center; }
 </style>
 </head>
 <body>
 
-<h2>กรอกข้อมูลเพื่อปริ้นฟอร์ม</h2>
+<h2>ฟอร์มลา</h2>
 
-<div class="form-field">
-  <label>ชื่อ:</label>
-  <input type="text" id="nameInput">
-</div>
+<label>ชื่อ - สกุล: <input type="text" id="name" /></label>
+<label>รหัสพนักงาน: <input type="text" id="empid" /></label>
+<label>ตำแหน่ง: <input type="text" id="position" /></label>
+<label>ฝ่าย: <input type="text" id="department" /></label>
 
-<div class="form-field">
-  <label>นามสกุล:</label>
-  <input type="text" id="surnameInput">
-</div>
+<h3>ประเภทการลา</h3>
+<label>ลาพักร้อน: <input type="text" id="vacation" class="checkbox" readonly /></label>
+<label>ลาป่วย: <input type="text" id="sick" class="checkbox" readonly /></label>
+<label>ลากิจ: <input type="text" id="personal" class="checkbox" readonly /></label>
 
-<button onclick="fillFormAndPrint()">ปริ้นฟอร์ม</button>
-
-<div class="form-preview" id="formPreview">
-  <h3>ฟอร์มตัวอย่าง</h3>
-  <p>ชื่อ: <span id="nameOutput"></span></p>
-  <p>นามสกุล: <span id="surnameOutput"></span></p>
-</div>
+<button onclick="window.print()">ปริ้นฟอร์ม</button>
 
 <script>
-function fillFormAndPrint() {
-  // เอาค่าจาก input ไปใส่ฟอร์ม
-  document.getElementById('nameOutput').textContent = document.getElementById('nameInput').value;
-  document.getElementById('surnameOutput').textContent = document.getElementById('surnameInput').value;
-  
-  // สั่งปริ้น
-  window.print();
+// Sheet ID ของคุณ
+const SHEET_ID = "1me4qq0popnFKJkXQMLCNUUfhoQEQtx5i_rAozKcxdQE";
+const SHEET_NAME = "Sheet1"; // ชื่อ Sheet
+
+// URL JSON ของ Sheet
+const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=YOUR_API_KEY`;
+
+// ฟังก์ชันโหลดข้อมูลจาก Sheet
+async function loadSheetData() {
+  const res = await fetch(url);
+  const data = await res.json();
+  const values = data.values;
+
+  // mapping ข้อมูลตามที่คุณแจ้ง
+  document.getElementById('name').value = values[6].slice(1, 8).join(' '); // B-H Row7
+  document.getElementById('empid').value = values[6][12]; // M Row7
+  document.getElementById('position').value = values[8].slice(1, 8).join(' '); // B-H Row9
+  document.getElementById('department').value = values[8][9]; // J Row9
+
+  // เครื่องหมาย ✓
+  document.getElementById('vacation').value = values[11][10] ? "✓" : "";
+  document.getElementById('sick').value = values[13][3] ? "✓" : "";
+  document.getElementById('personal').value = values[15][3] ? "✓" : "";
 }
+
+// เรียกใช้งาน
+loadSheetData();
 </script>
 
 </body>
