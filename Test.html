@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <title>ระบบลาออนไลน์</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.0.0/signature_pad.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <style>
 body { font-family: Arial, sans-serif; padding: 20px; }
 label { display: block; margin-top: 10px; }
 input, textarea { width: 300px; padding: 5px; margin-bottom: 10px; }
 canvas { border: 1px solid #ccc; margin-top: 10px; }
 button { margin-top: 10px; padding: 10px 20px; }
+iframe { width: 100%; height: 500px; margin-top: 20px; border: 1px solid #ccc; }
 </style>
 </head>
 <body>
@@ -37,7 +38,7 @@ button { margin-top: 10px; padding: 10px 20px; }
   <button type="button" id="generatePDF">สร้าง PDF + พรีวิว</button>
 </form>
 
-<iframe id="pdfPreview" style="width:100%; height:500px; margin-top:20px;"></iframe>
+<iframe id="pdfPreview"></iframe>
 
 <script>
 const { jsPDF } = window.jspdf;
@@ -49,35 +50,41 @@ document.getElementById("clearSig").addEventListener("click", () => {
 });
 
 document.getElementById("generatePDF").addEventListener("click", () => {
-  if (!signaturePad.isEmpty()) {
-    const doc = new jsPDF();
+  const name = document.getElementById("name").value.trim();
+  const department = document.getElementById("department").value.trim();
+  const leaveDate = document.getElementById("leaveDate").value;
+  const reason = document.getElementById("reason").value.trim();
 
-    const name = document.getElementById("name").value;
-    const department = document.getElementById("department").value;
-    const leaveDate = document.getElementById("leaveDate").value;
-    const reason = document.getElementById("reason").value;
-
-    // พื้นที่ข้อความ
-    doc.setFont("THSarabun", "normal");
-    doc.setFontSize(16);
-    doc.text("แบบฟอร์มใบลา", 105, 20, { align: "center" });
-    doc.setFontSize(12);
-    doc.text(`ชื่อ-นามสกุล: ${name}`, 20, 40);
-    doc.text(`แผนก: ${department}`, 20, 50);
-    doc.text(`วันที่ลา: ${leaveDate}`, 20, 60);
-    doc.text(`เหตุผล: ${reason}`, 20, 70);
-
-    // ลายเซ็น
-    const sigImg = signaturePad.toDataURL();
-    doc.addImage(sigImg, "PNG", 20, 80, 100, 40);
-
-    // preview ใน iframe
-    const pdfBlob = doc.output("blob");
-    document.getElementById("pdfPreview").src = URL.createObjectURL(pdfBlob);
-
-  } else {
-    alert("กรุณาลงลายเซ็นด้วยครับ");
+  if (!name || !department || !leaveDate || !reason) {
+    alert("กรุณากรอกข้อมูลให้ครบทุกช่องครับ");
+    return;
   }
+  if (signaturePad.isEmpty()) {
+    alert("กรุณาลงลายเซ็นด้วยครับ");
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  // ใส่ข้อความภาษาไทยต้องใช้ addFont แบบ TTF หากต้องการสวย
+  // ตอนนี้ใช้ default font ของ jsPDF (อ่านได้บ้าง)
+  doc.setFontSize(16);
+  doc.text("แบบฟอร์มใบลา", 105, 20, { align: "center" });
+
+  doc.setFontSize(12);
+  doc.text(`ชื่อ-นามสกุล: ${name}`, 20, 40);
+  doc.text(`แผนก: ${department}`, 20, 50);
+  doc.text(`วันที่ลา: ${leaveDate}`, 20, 60);
+  doc.text(`เหตุผล: ${reason}`, 20, 70);
+
+  // ใส่ลายเซ็น
+  const sigImg = signaturePad.toDataURL("image/png");
+  doc.addImage(sigImg, "PNG", 20, 80, 100, 40);
+
+  // สร้าง blob สำหรับ preview
+  const pdfBlob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  document.getElementById("pdfPreview").src = blobUrl;
 });
 </script>
 
