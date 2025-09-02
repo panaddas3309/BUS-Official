@@ -2,44 +2,47 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ฟอร์มลา</title>
+<title>ฟอร์มลา PDF</title>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 </head>
 <body>
-<h2>ฟอร์มลา</h2>
+<h2>กรอกฟอร์มลา</h2>
+
 <form id="leaveForm">
-  <label>ชื่อ-สกุล: <input type="text" id="fullName" required></label>
-  <label>รหัสพนักงาน: <input type="text" id="employeeID" required></label>
-  <label>ตำแหน่ง: <input type="text" id="position" required></label>
-  <label>ฝ่าย: <input type="text" id="department" required></label>
+  <label>ชื่อ-สกุล: <input type="text" id="fullName"></label>
+  <label>รหัสพนักงาน: <input type="text" id="employeeID"></label>
+  <label>ตำแหน่ง: <input type="text" id="position"></label>
+  <label>ฝ่าย: <input type="text" id="department"></label>
   <button type="button" onclick="generatePDF()">สร้าง PDF</button>
 </form>
 
 <script>
 async function generatePDF() {
-  const url = 'https://panaddas3309.github.io/BUS-Official/template.pdf';
+  const url = "https://panaddas3309.github.io/BUS-Official/template.pdf"; // PDF Template
   const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer());
 
   const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
   const form = pdfDoc.getForm();
 
-  // ใส่ค่าจากฟอร์ม HTML ลงในฟิลด์ PDF
-  form.getTextField('Textbox1').setText(document.getElementById('fullName').value);
-  form.getTextField('Textbox2').setText(document.getElementById('employeeID').value);
-  form.getTextField('Textbox3').setText(document.getElementById('position').value);
-  form.getTextField('Textbox4').setText(document.getElementById('department').value);
+  // ใส่ข้อมูลลงฟิลด์
+  form.getTextField("Textbox1").setText(document.getElementById("fullName").value);
+  form.getTextField("Textbox2").setText(document.getElementById("employeeID").value);
+  form.getTextField("Textbox3").setText(document.getElementById("position").value);
+  form.getTextField("Textbox4").setText(document.getElementById("department").value);
 
-  // กำหนดให้ฟิลด์ไม่มีกรอบ (ถ้า PDF รองรับ)
-  form.getFields().forEach(f => f.updateAppearances(PDFLib.StandardFonts.Helvetica));
+  // ทำให้ฟิลด์ไม่มีกรอบ (optional)
+  ["Textbox1","Textbox2","Textbox3","Textbox4"].forEach(name => {
+    const field = form.getTextField(name);
+    field.updateAppearances(PDFLib.StandardFonts.Helvetica);
+  });
 
   const pdfBytes = await pdfDoc.save();
 
   // ดาวน์โหลด PDF
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-  const link = document.createElement('a');
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = 'LeaveForm.pdf';
+  link.download = "LeaveForm.pdf";
   link.click();
 }
 </script>
