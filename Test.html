@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>ฟอร์มลา</title>
-<style>
-  body { font-family: Arial; padding: 20px; }
-  label { display: block; margin-top: 10px; }
-  input[type="text"] { width: 300px; padding: 5px; }
-  .checkbox { width: 20px; height: 20px; text-align: center; }
-</style>
+  <meta charset="UTF-8">
+  <title>ฟอร์มลา</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input[type="text"] { width: 300px; padding: 5px; }
+    .checkbox { width: 20px; height: 20px; text-align: center; }
+  </style>
 </head>
 <body>
 
 <h2>ฟอร์มลา</h2>
 
-<label>ชื่อ - สกุล: <input type="text" id="name" /></label>
-<label>รหัสพนักงาน: <input type="text" id="empid" /></label>
-<label>ตำแหน่ง: <input type="text" id="position" /></label>
-<label>ฝ่าย: <input type="text" id="department" /></label>
+<label>ชื่อ - สกุล: <input type="text" id="name" readonly /></label>
+<label>รหัสพนักงาน: <input type="text" id="empid" readonly /></label>
+<label>ตำแหน่ง: <input type="text" id="position" readonly /></label>
+<label>ฝ่าย: <input type="text" id="department" readonly /></label>
 
 <h3>ประเภทการลา</h3>
 <label>ลาพักร้อน: <input type="text" id="vacation" class="checkbox" readonly /></label>
@@ -27,31 +27,26 @@
 <button onclick="window.print()">ปริ้นฟอร์ม</button>
 
 <script>
-// ใส่ Spreadsheet ID ของคุณ
-const SHEET_ID = "1me4qq0popnFKJkXQMLCNUUfhoQEQtx5i_rAozKcxdQE";
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/1me4qq0popnFKJkXQMLCNUUfhoQEQtx5i_rAozKcxdQE/export?format=csv&gid=0';
 
-async function loadCSV() {
-  const res = await fetch(CSV_URL);
-  const text = await res.text();
+  async function loadCSV() {
+    const res = await fetch(CSV_URL);
+    const text = await res.text();
+    const rows = text.split('\n').map(row => row.split(','));
 
-  // แปลง CSV เป็น Array 2D
-  const rows = text.split('\n').map(r => r.split(','));
+    // ดึงข้อมูลจากแถวที่ 7 (index 6) และ 9 (index 8)
+    document.getElementById('name').value = rows[6].slice(1, 8).join(' '); // B-H Row7
+    document.getElementById('empid').value = rows[6][12]; // M Row7
+    document.getElementById('position').value = rows[8].slice(1, 8).join(' '); // B-H Row9
+    document.getElementById('department').value = rows[8][9]; // J Row9
 
-  // mapping ข้อมูลตามที่คุณแจ้ง
-  document.getElementById('name').value = rows[6].slice(1,8).join(' '); // B-H Row7
-  document.getElementById('empid').value = rows[6][12]; // M Row7
-  document.getElementById('position').value = rows[8].slice(1,8).join(' '); // B-H Row9
-  document.getElementById('department').value = rows[8][9]; // J Row9
+    // แสดงเครื่องหมาย ✓ ในประเภทการลา
+    document.getElementById('vacation').value = rows[11][10] ? '✓' : '';
+    document.getElementById('sick').value = rows[13][3] ? '✓' : '';
+    document.getElementById('personal').value = rows[15][3] ? '✓' : '';
+  }
 
-  // เครื่องหมาย ✓
-  document.getElementById('vacation').value = rows[11][10] ? "✓" : "";
-  document.getElementById('sick').value = rows[13][3] ? "✓" : "";
-  document.getElementById('personal').value = rows[15][3] ? "✓" : "";
-}
-
-// เรียกใช้งาน
-loadCSV();
+  loadCSV();
 </script>
 
 </body>
